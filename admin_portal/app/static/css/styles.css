@@ -114,10 +114,6 @@ h2 { font-size: 16px; margin: 0 0 12px; }
 .row-actions { display: flex; gap: 10px; }
 .row-actions form { display: inline; }
 
-.message-row { cursor: pointer; }
-.message-body-row td { background: #f8fafc; }
-.message-body { white-space: pre-wrap; word-break: break-word; margin: 0; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; }
-
 .status-pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #e2e8f0; color: var(--text); }
 .status-online { background: #dcfce7; color: var(--green); }
 .status-offline { background: #fee2e2; color: var(--red); }
@@ -176,3 +172,60 @@ h2 { font-size: 16px; margin: 0 0 12px; }
 .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
 .flash-success { background: #dcfce7; color: var(--green); }
 .flash-error { background: #fee2e2; color: var(--red); }
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+    background: var(--panel-bg);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.modal-header h2 { margin: 0; }
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px; overflow-y: auto; }
+.modal-body .detail-list { margin-bottom: 16px; }
+.field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.modal-body-text {
+    width: 100%;
+    min-height: 120px;
+    max-height: 260px;
+    resize: vertical;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 13px;
+    background: #f8fafc;
+    color: var(--text);
+}

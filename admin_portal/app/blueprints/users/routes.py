@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.blueprints.users import users_bp
 from app.blueprints.users.forms import EndUserForm
 from app.extensions import db
+from app.models.admin_user import AdminUser
 from app.models.audit_log import ActorType, EventType
 from app.models.device import Device
 from app.models.end_user import EndUser, EndUserStatus
@@ -51,6 +52,14 @@ def index():
 
     page = paginate(stmt)
 
+    admin_ids = {u.created_by_admin_id for u in page.items if u.created_by_admin_id}
+    admins_by_id = {}
+    if admin_ids:
+        admins = db.session.execute(
+            select(AdminUser).where(AdminUser.id.in_(admin_ids))
+        ).scalars().all()
+        admins_by_id = {a.id: a.username for a in admins}
+
     return render_template(
         "users/index.html",
         page=page,
@@ -58,6 +67,7 @@ def index():
         status_filter=status_filter,
         sort_key=sort_key,
         direction=direction,
+        admins_by_id=admins_by_id,
     )
 
 

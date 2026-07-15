@@ -1,0 +1,40 @@
+<script>
+(function () {
+    var overlay = document.getElementById('view-modal');
+    if (!overlay) { return; }
+    var body = document.getElementById('view-modal-body');
+
+    function openModal(templateId) {
+        var template = document.getElementById(templateId);
+        if (!template) { return; }
+        body.innerHTML = '';
+        body.appendChild(template.content.cloneNode(true));
+        overlay.classList.add('open');
+    }
+
+    function closeModal() {
+        overlay.classList.remove('open');
+        body.innerHTML = '';
+    }
+
+    document.querySelectorAll('[data-modal-template]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openModal(btn.dataset.modalTemplate);
+        });
+    });
+
+    overlay.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+        btn.addEventListener('click', closeModal);
+    });
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) { closeModal(); }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && overlay.classList.contains('open')) {
+            closeModal();
+        }
+    });
+})();
+</script>

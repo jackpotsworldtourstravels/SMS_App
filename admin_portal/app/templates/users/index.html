@@ -45,6 +45,7 @@
             </td>
             <td>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device and device.last_seen_at else '—' }}</td>
             <td class="row-actions">
+                <button type="button" class="link-button view-btn" data-modal-template="user-detail-{{ user.id }}">View</button>
                 <a href="{{ url_for('users.edit', user_id=user.id) }}">Edit</a>
                 {% if user.status == 'active' %}
                 <form method="post" action="{{ url_for('users.disable', user_id=user.id) }}" onsubmit="return confirm('Disable this user?');">
@@ -54,6 +55,27 @@
                 {% endif %}
             </td>
         </tr>
+        <template id="user-detail-{{ user.id }}">
+            <dl class="detail-list">
+                <dt>User ID</dt><dd>{{ user.id }}</dd>
+                <dt>Full Name</dt><dd>{{ user.name }}</dd>
+                <dt>Mobile Number</dt><dd>{{ user.phone_number or '-' }}</dd>
+                <dt>Status</dt>
+                <dd>
+                    {% if user.status == 'active' %}
+                        <span class="status-pill status-online">Active</span>
+                    {% else %}
+                        <span class="status-pill status-offline">Disabled</span>
+                    {% endif %}
+                </dd>
+                <dt>Notes</dt><dd>{{ user.notes or '-' }}</dd>
+                <dt>Device Name</dt><dd>{{ device.device_name if device else '—' }}</dd>
+                <dt>Device ID</dt><dd class="mono">{{ device.id if device else '—' }}</dd>
+                <dt>Registration Date</dt><dd>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '—' }}</dd>
+                <dt>Updated At</dt><dd>{{ user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else '—' }}</dd>
+                <dt>Created By</dt><dd>{{ admins_by_id.get(user.created_by_admin_id, '—') }}</dd>
+            </dl>
+        </template>
         {% else %}
         <tr><td colspan="7" class="muted">No users yet.</td></tr>
         {% endfor %}
@@ -61,4 +83,18 @@
 </table>
 
 {% include 'components/pagination.html' %}
+
+<div class="modal-overlay" id="view-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
+        <div class="modal-header">
+            <h2 id="view-modal-title">User Details</h2>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="view-modal-body"></div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{% include 'components/view_modal.html' %}
 {% endblock %}

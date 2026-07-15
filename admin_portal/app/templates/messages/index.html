@@ -41,11 +41,12 @@
             <th>{% set a = dict(base_args, sort='reference_id', dir='desc' if sort_key == 'reference_id' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Reference ID</a></th>
             <th>{% set a = dict(base_args, sort='received_at', dir='desc' if sort_key == 'received_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Received</a></th>
             <th>{% set a = dict(base_args, sort='uploaded_at', dir='desc' if sort_key == 'uploaded_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Uploaded</a></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for message in page.items %}
-        <tr class="message-row" data-target="msg-{{ message.id }}">
+        <tr>
             <td class="mono">{{ message.id }}</td>
             <td>{{ message.end_user.name if message.end_user else '—' }}</td>
             <td class="mono">{{ message.amount if message.amount is not none else '-' }}</td>
@@ -55,25 +56,44 @@
             <td class="mono">{{ message.reference_id or '-' }}</td>
             <td>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</td>
             <td>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</td>
+            <td class="row-actions">
+                <button type="button" class="link-button view-btn" data-modal-template="msg-detail-{{ message.id }}">View</button>
+            </td>
         </tr>
-        <tr id="msg-{{ message.id }}" class="message-body-row" hidden>
-            <td colspan="9"><pre class="message-body">{{ message.message_body }}</pre></td>
-        </tr>
+        <template id="msg-detail-{{ message.id }}">
+            <dl class="detail-list">
+                <dt>User</dt><dd>{{ message.end_user.name if message.end_user else '—' }}</dd>
+                <dt>Device</dt><dd>{{ message.device.device_name if message.device else message.device_id }}</dd>
+                <dt>Sender</dt><dd class="mono">{{ message.sender_raw }}</dd>
+                <dt>Amount</dt><dd>{{ message.amount if message.amount is not none else '-' }}</dd>
+                <dt>Category</dt><dd><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></dd>
+                <dt>Reference ID</dt><dd class="mono">{{ message.reference_id or '-' }}</dd>
+                <dt>Received Time</dt><dd>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</dd>
+                <dt>Synced Time</dt><dd>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</dd>
+                <dt>Message Status</dt><dd><span class="status-pill status-online">Synced</span></dd>
+            </dl>
+            <label class="field-label" for="msg-body-{{ message.id }}">SMS Body (Complete Original Message)</label>
+            <textarea id="msg-body-{{ message.id }}" class="modal-body-text" readonly>{{ message.message_body }}</textarea>
+        </template>
         {% else %}
-        <tr><td colspan="9" class="muted">No messages yet.</td></tr>
+        <tr><td colspan="10" class="muted">No messages yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
 {% include 'components/pagination.html' %}
+
+<div class="modal-overlay" id="view-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
+        <div class="modal-header">
+            <h2 id="view-modal-title">Message Details</h2>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="view-modal-body"></div>
+    </div>
+</div>
+
 {% endblock %}
 {% block scripts %}
-<script>
-document.querySelectorAll('.message-row').forEach(function (row) {
-    row.addEventListener('click', function () {
-        var target = document.getElementById(row.dataset.target);
-        if (target) { target.hidden = !target.hidden; }
-    });
-});
-</script>
+{% include 'components/view_modal.html' %}
 {% endblock %}

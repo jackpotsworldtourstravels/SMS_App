@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models.admin_user import AdminUser, Role
 from app.models.device import Device
 from app.models.message import Message
+from app.services.amount_extraction import extract_amount
 from app.services.reference_extraction import extract_reference_id
 
 # Test/dummy records created during development and Render deploy
@@ -71,6 +72,27 @@ def backfill_reference_ids() -> None:
 
     db.session.commit()
     click.echo(f"Scanned {len(messages)} message(s), updated {updated} with a reference_id.")
+
+
+@click.command("backfill-amounts")
+@with_appcontext
+def backfill_amounts() -> None:
+    """One-off maintenance: re-run amount extraction against messages
+    stored before the amount column existed (or before the extractor
+    handled their format). Safe to re-run — only touches rows where
+    amount is currently NULL."""
+
+    messages = Message.query.filter(Message.amount.is_(None)).all()
+    updated = 0
+
+    for message in messages:
+        amount = extract_amount(message.message_body)
+        if amount is not None:
+            message.amount = amount
+            updated += 1
+
+    db.session.commit()
+    click.echo(f"Scanned {len(messages)} message(s), updated {updated} with an amount.")
 
 
 @click.command("cleanup-test-records")
