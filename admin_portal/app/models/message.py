@@ -46,6 +46,11 @@ class Message(db.Model):
         db.String(10), nullable=False, default=MessageCategory.UNKNOWN, index=True
     )
 
+    # UTR / Ref No. / Transaction ID extracted from message_body at ingest
+    # time, where the bank's SMS wording makes it detectable. Nullable —
+    # not every message contains one (e.g. OTP messages usually don't).
+    reference_id: str | None = db.Column(db.String(64), index=True)
+
     received_at: datetime = db.Column(
         db.DateTime(timezone=True), nullable=False, index=True
     )

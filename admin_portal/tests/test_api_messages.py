@@ -29,7 +29,7 @@ def test_upload_message_categorizes_and_stores(app, client):
                     "client_message_id": "m1",
                     "sender_raw": "AX-HDFCBK-S",
                     "sender_matched": "HDFCBK",
-                    "body": "Rs.500.00 debited from A/c XX1234. Avl bal Rs.10,234.50",
+                    "body": "Rs.500.00 debited from A/c XX1234. Ref No 445566778899. Avl bal Rs.10,234.50",
                     "received_at": "2026-07-14T10:00:00Z",
                 }
             ]
@@ -39,12 +39,14 @@ def test_upload_message_categorizes_and_stores(app, client):
     body = response.get_json()
     assert body["accepted"] == 1
     assert body["results"][0]["category"] == "DEBIT"
+    assert body["results"][0]["reference_id"] == "445566778899"
 
     with app.app_context():
         message = Message.query.filter_by(client_message_id="m1").first()
         assert message is not None
         assert message.category == "DEBIT"
         assert message.message_body.startswith("Rs.500.00")
+        assert message.reference_id == "445566778899"
 
 
 def test_duplicate_message_is_deduped(client):

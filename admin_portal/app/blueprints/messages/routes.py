@@ -48,13 +48,21 @@ def index():
         )
 
     stmt = apply_search(
-        stmt, [Message.message_body, Message.sender_raw, Message.sender_matched], q
+        stmt,
+        [
+            Message.message_body,
+            Message.sender_raw,
+            Message.sender_matched,
+            Message.reference_id,
+        ],
+        q,
     )
 
     sort_map = {
         "received_at": Message.received_at,
         "uploaded_at": Message.uploaded_at,
         "category": Message.category,
+        "reference_id": Message.reference_id,
     }
     stmt = apply_sort(stmt, sort_map, sort_key, "received_at", direction)
 

@@ -4,7 +4,7 @@
 <h1>Messages</h1>
 
 <form method="get" class="toolbar toolbar-wrap">
-    <input type="text" name="q" value="{{ q }}" placeholder="Search message text or sender…">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search message text, sender or reference ID…">
     <select name="category">
         <option value="">All categories</option>
         {% for c in categories %}
@@ -31,13 +31,15 @@
 <table class="data-table">
     <thead>
         <tr>
+            {% set base_args = request.args.to_dict() %}
             <th>ID</th>
             <th>User</th>
             <th>Device</th>
             <th>Sender ID</th>
-            <th>Category</th>
-            <th>Received</th>
-            <th>Uploaded</th>
+            <th>{% set a = dict(base_args, sort='category', dir='desc' if sort_key == 'category' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Category</a></th>
+            <th>{% set a = dict(base_args, sort='reference_id', dir='desc' if sort_key == 'reference_id' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Reference ID</a></th>
+            <th>{% set a = dict(base_args, sort='received_at', dir='desc' if sort_key == 'received_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Received</a></th>
+            <th>{% set a = dict(base_args, sort='uploaded_at', dir='desc' if sort_key == 'uploaded_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Uploaded</a></th>
         </tr>
     </thead>
     <tbody>
@@ -48,14 +50,15 @@
             <td>{{ message.device.device_name if message.device else message.device_id }}</td>
             <td class="mono">{{ message.sender_raw }}</td>
             <td><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></td>
+            <td class="mono">{{ message.reference_id or '-' }}</td>
             <td>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</td>
             <td>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</td>
         </tr>
         <tr id="msg-{{ message.id }}" class="message-body-row" hidden>
-            <td colspan="7"><pre class="message-body">{{ message.message_body }}</pre></td>
+            <td colspan="8"><pre class="message-body">{{ message.message_body }}</pre></td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="muted">No messages yet.</td></tr>
+        <tr><td colspan="8" class="muted">No messages yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>

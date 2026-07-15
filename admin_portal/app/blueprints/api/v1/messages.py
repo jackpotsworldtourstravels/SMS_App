@@ -13,6 +13,7 @@ from app.models.device import Device
 from app.models.message import Message
 from app.services.audit import log_event
 from app.services.categorization import categorize_message
+from app.services.reference_extraction import extract_reference_id
 
 
 @v1_bp.route("/messages", methods=["POST"])
@@ -49,6 +50,7 @@ def upload_messages():
             continue
 
         category = categorize_message(item.body)
+        reference_id = extract_reference_id(item.body)
 
         message = Message(
             device_id=device.id,
@@ -57,6 +59,7 @@ def upload_messages():
             sender_matched=item.sender_matched,
             message_body=item.body,
             category=category,
+            reference_id=reference_id,
             received_at=item.received_at,
             uploaded_at=now,
             client_message_id=item.client_message_id,
@@ -89,6 +92,7 @@ def upload_messages():
                 "client_message_id": item.client_message_id,
                 "status": "accepted",
                 "category": category,
+                "reference_id": reference_id,
                 "message_id": message.id,
             }
         )

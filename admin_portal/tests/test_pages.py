@@ -26,10 +26,21 @@ def _seed(app):
             sender_matched="HDFCBK",
             message_body="Rs.500.00 debited from A/c XX1234. This is a full, untruncated body of decent length to check rendering.",
             category=MessageCategory.DEBIT,
+            reference_id="REF998877",
             received_at=db.func.now(),
             client_message_id="seed-1",
         )
-        db.session.add(message)
+        message_no_ref = Message(
+            device_id=device.id,
+            end_user_id=user.id,
+            sender_raw="AX-HDFCBK-S",
+            sender_matched="HDFCBK",
+            message_body="123456 is your OTP. Do not share it.",
+            category=MessageCategory.OTP,
+            received_at=db.func.now(),
+            client_message_id="seed-2",
+        )
+        db.session.add_all([message, message_no_ref])
         db.session.commit()
         return device.id, user.id
 
@@ -75,6 +86,28 @@ def test_messages_page_category_filter(app, logged_in_client):
     _seed(app)
     response = logged_in_client.get("/messages/?category=OTP")
     assert b"full, untruncated body" not in response.data
+
+
+def test_messages_page_shows_reference_id_and_falls_back_to_dash(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/")
+    assert b"REF998877" in response.data
+    # The OTP-seeded message has no reference_id and must show a dash,
+    # not an empty cell or "None".
+    assert b">-</td>" in response.data
+
+
+def test_messages_page_search_by_reference_id(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/?q=REF998877")
+    assert b"REF998877" in response.data
+    assert b"123456 is your OTP" not in response.data
+
+
+def test_messages_page_sort_by_reference_id(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/?sort=reference_id&dir=asc")
+    assert response.status_code == 200
 
 
 def test_device_detail_and_revoke(app, logged_in_client):
