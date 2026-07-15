@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Admin Portal{% endblock %} · sms_frwd</title>
+    <title>{% block title %}Admin Portal{% endblock %} · Transaction SMS App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -11,7 +11,7 @@
 {% if current_user.is_authenticated %}
 <div class="app-shell">
     <aside class="sidebar">
-        <div class="sidebar-brand">sms_frwd admin</div>
+        <div class="sidebar-brand">Transaction SMS App</div>
         <nav class="sidebar-nav">
             <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">Dashboard</a>
             <a href="{{ url_for('devices.index') }}" class="{{ 'active' if request.blueprint == 'devices' }}">Devices</a>
