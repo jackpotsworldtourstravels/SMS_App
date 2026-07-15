@@ -194,6 +194,20 @@
         });
     }
 
+    function initFormLoadingState() {
+        document.querySelectorAll('form[method="post" i]').forEach(function (form) {
+            form.addEventListener("submit", function () {
+                var btn = form.querySelector('button[type="submit"], input[type="submit"]');
+                if (!btn || btn.disabled) { return; }
+                btn.disabled = true;
+                if (btn.tagName === "BUTTON") {
+                    btn.dataset.originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + btn.textContent.trim();
+                }
+            });
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         initThemeToggle();
         initSidebarCollapse();
@@ -204,5 +218,6 @@
         initCopyButtons();
         initRefreshButtons();
         initExportCsv();
+        initFormLoadingState();
     });
 })();

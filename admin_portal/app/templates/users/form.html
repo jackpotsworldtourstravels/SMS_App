@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}{{ 'Edit User' if mode == 'edit' else 'Add User' }}{% endblock %}
 {% block content %}
 <div class="page-header">
@@ -12,16 +13,16 @@
     {{ form.hidden_tag() }}
     <div class="field">
         {{ form.name.label }}
-        {{ form.name() }}
+        <div class="input-wrap">{{ icons.icon('user', size=16) }}{{ form.name() }}</div>
         {% for error in form.name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
     </div>
     <div class="field">
         {{ form.phone_number.label }}
-        {{ form.phone_number() }}
+        <div class="input-wrap">{{ icons.icon('phone', size=16) }}{{ form.phone_number() }}</div>
     </div>
     <div class="field">
         {{ form.device_id.label }}
-        {{ form.device_id() }}
+        <div class="input-wrap">{{ icons.icon('smartphone', size=16) }}{{ form.device_id() }}</div>
     </div>
     <div class="field">
         {{ form.notes.label }}

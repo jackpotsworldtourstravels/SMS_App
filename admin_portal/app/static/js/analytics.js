@@ -3,7 +3,7 @@
     if (!dataEl) { return; }
     var data = JSON.parse(dataEl.textContent);
 
-    var PALETTE = ["#5546ec", "#059669", "#e11d48", "#d97706", "#3b82f6", "#8a8f9c"];
+    var PALETTE = ["#2563eb", "#16a34a", "#ef4444", "#f59e0b", "#3b82f6", "#8a8f9c"];
 
     function cssVar(name) {
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -36,8 +36,8 @@
             data: {
                 labels: days.map(function (d) { return d.slice(5); }),
                 datasets: [
-                    { label: "Credit", data: days.map(function (d) { return byDay[d].CREDIT || 0; }), backgroundColor: "#059669", borderRadius: 4, maxBarThickness: 22 },
-                    { label: "Debit", data: days.map(function (d) { return byDay[d].DEBIT || 0; }), backgroundColor: "#e11d48", borderRadius: 4, maxBarThickness: 22 },
+                    { label: "Credit", data: days.map(function (d) { return byDay[d].CREDIT || 0; }), backgroundColor: "#16a34a", borderRadius: 4, maxBarThickness: 22 },
+                    { label: "Debit", data: days.map(function (d) { return byDay[d].DEBIT || 0; }), backgroundColor: "#ef4444", borderRadius: 4, maxBarThickness: 22 },
                 ],
             },
             options: {
@@ -57,7 +57,7 @@
             type: "bar",
             data: {
                 labels: data.hourlyActivity.map(function (d) { return d.hour + ":00"; }),
-                datasets: [{ data: data.hourlyActivity.map(function (d) { return d.count; }), backgroundColor: "#5546ec", borderRadius: 4, maxBarThickness: 14 }],
+                datasets: [{ data: data.hourlyActivity.map(function (d) { return d.count; }), backgroundColor: "#2563eb", borderRadius: 4, maxBarThickness: 14 }],
             },
             options: {
                 responsive: true,

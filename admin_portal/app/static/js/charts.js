@@ -3,13 +3,13 @@
     var dashboardUrl = script.getAttribute("data-dashboard-url");
 
     var COLORS = {
-        otp: "#d97706",
-        credit: "#059669",
-        debit: "#e11d48",
+        otp: "#f59e0b",
+        credit: "#16a34a",
+        debit: "#ef4444",
         unknown: "#8a8f9c",
-        online: "#059669",
-        offline: "#e11d48",
-        accent: "#5546ec",
+        online: "#16a34a",
+        offline: "#ef4444",
+        accent: "#2563eb",
     };
 
     function categoryColor(category) {
@@ -77,7 +77,7 @@
                     label: "Messages",
                     data: data.map(function (d) { return d.count; }),
                     borderColor: COLORS.accent,
-                    backgroundColor: "rgba(85, 70, 236, 0.08)",
+                    backgroundColor: "rgba(37, 99, 235, 0.08)",
                     fill: true,
                     tension: 0.35,
                     pointRadius: 0,
