@@ -75,6 +75,7 @@ def _register_cli(app: Flask) -> None:
 
     app.cli.add_command(cli.create_admin)
     app.cli.add_command(cli.backfill_reference_ids)
+    app.cli.add_command(cli.cleanup_test_records)
 
 
 def _register_template_helpers(app: Flask) -> None:

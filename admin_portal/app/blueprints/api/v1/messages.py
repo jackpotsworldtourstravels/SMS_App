@@ -11,6 +11,7 @@ from app.extensions import db
 from app.models.audit_log import ActorType, EventType
 from app.models.device import Device
 from app.models.message import Message
+from app.services.amount_extraction import extract_amount
 from app.services.audit import log_event
 from app.services.categorization import categorize_message
 from app.services.reference_extraction import extract_reference_id
@@ -51,6 +52,7 @@ def upload_messages():
 
         category = categorize_message(item.body)
         reference_id = extract_reference_id(item.body)
+        amount = extract_amount(item.body)
 
         message = Message(
             device_id=device.id,
@@ -60,6 +62,7 @@ def upload_messages():
             message_body=item.body,
             category=category,
             reference_id=reference_id,
+            amount=amount,
             received_at=item.received_at,
             uploaded_at=now,
             client_message_id=item.client_message_id,
@@ -93,6 +96,7 @@ def upload_messages():
                 "status": "accepted",
                 "category": category,
                 "reference_id": reference_id,
+                "amount": float(amount) if amount is not None else None,
                 "message_id": message.id,
             }
         )

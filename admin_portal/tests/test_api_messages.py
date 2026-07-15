@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from app.extensions import db
 from app.models.device import Device
@@ -40,6 +41,7 @@ def test_upload_message_categorizes_and_stores(app, client):
     assert body["accepted"] == 1
     assert body["results"][0]["category"] == "DEBIT"
     assert body["results"][0]["reference_id"] == "445566778899"
+    assert body["results"][0]["amount"] == 500.0
 
     with app.app_context():
         message = Message.query.filter_by(client_message_id="m1").first()
@@ -47,6 +49,33 @@ def test_upload_message_categorizes_and_stores(app, client):
         assert message.category == "DEBIT"
         assert message.message_body.startswith("Rs.500.00")
         assert message.reference_id == "445566778899"
+        assert message.amount == Decimal("500.00")
+
+
+def test_upload_message_with_no_amount_stores_null(app, client):
+    reg = _register(client)
+    response = client.post(
+        "/api/v1/messages",
+        headers=_auth_header(reg["api_token"]),
+        json={
+            "messages": [
+                {
+                    "client_message_id": "m-no-amount",
+                    "sender_raw": "AX-HDFCBK-S",
+                    "sender_matched": "HDFCBK",
+                    "body": "123456 is your OTP. Do not share it.",
+                    "received_at": "2026-07-14T10:00:00Z",
+                }
+            ]
+        },
+    )
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["results"][0]["amount"] is None
+
+    with app.app_context():
+        message = Message.query.filter_by(client_message_id="m-no-amount").first()
+        assert message.amount is None
 
 
 def test_duplicate_message_is_deduped(client):

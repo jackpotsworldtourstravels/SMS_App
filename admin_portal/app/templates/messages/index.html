@@ -34,6 +34,7 @@
             {% set base_args = request.args.to_dict() %}
             <th>ID</th>
             <th>User</th>
+            <th>{% set a = dict(base_args, sort='amount', dir='desc' if sort_key == 'amount' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Amount</a></th>
             <th>Device</th>
             <th>Sender ID</th>
             <th>{% set a = dict(base_args, sort='category', dir='desc' if sort_key == 'category' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Category</a></th>
@@ -47,6 +48,7 @@
         <tr class="message-row" data-target="msg-{{ message.id }}">
             <td class="mono">{{ message.id }}</td>
             <td>{{ message.end_user.name if message.end_user else '—' }}</td>
+            <td class="mono">{{ message.amount if message.amount is not none else '-' }}</td>
             <td>{{ message.device.device_name if message.device else message.device_id }}</td>
             <td class="mono">{{ message.sender_raw }}</td>
             <td><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></td>
@@ -55,10 +57,10 @@
             <td>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</td>
         </tr>
         <tr id="msg-{{ message.id }}" class="message-body-row" hidden>
-            <td colspan="8"><pre class="message-body">{{ message.message_body }}</pre></td>
+            <td colspan="9"><pre class="message-body">{{ message.message_body }}</pre></td>
         </tr>
         {% else %}
-        <tr><td colspan="8" class="muted">No messages yet.</td></tr>
+        <tr><td colspan="9" class="muted">No messages yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>

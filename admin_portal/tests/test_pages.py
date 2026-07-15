@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from app.extensions import db
 from app.models.device import Device
@@ -27,6 +28,7 @@ def _seed(app):
             message_body="Rs.500.00 debited from A/c XX1234. This is a full, untruncated body of decent length to check rendering.",
             category=MessageCategory.DEBIT,
             reference_id="REF998877",
+            amount=Decimal("500.00"),
             received_at=db.func.now(),
             client_message_id="seed-1",
         )
@@ -107,6 +109,27 @@ def test_messages_page_search_by_reference_id(app, logged_in_client):
 def test_messages_page_sort_by_reference_id(app, logged_in_client):
     _seed(app)
     response = logged_in_client.get("/messages/?sort=reference_id&dir=asc")
+    assert response.status_code == 200
+
+
+def test_messages_page_shows_amount_and_falls_back_to_dash(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/")
+    assert b"500.00" in response.data
+    # The OTP-seeded message has no amount and must show a dash.
+    assert b">-</td>" in response.data
+
+
+def test_messages_page_search_by_amount(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/?q=500.00")
+    assert b"500.00" in response.data
+    assert b"123456 is your OTP" not in response.data
+
+
+def test_messages_page_sort_by_amount(app, logged_in_client):
+    _seed(app)
+    response = logged_in_client.get("/messages/?sort=amount&dir=asc")
     assert response.status_code == 200
 
 

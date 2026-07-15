@@ -2,7 +2,8 @@ from datetime import datetime, time
 
 from flask import render_template, request
 from flask_login import login_required
-from sqlalchemy import select
+from sqlalchemy import cast, select
+from sqlalchemy import String as SqlString
 
 from app.blueprints.messages import messages_bp
 from app.models.device import Device
@@ -54,6 +55,7 @@ def index():
             Message.sender_raw,
             Message.sender_matched,
             Message.reference_id,
+            cast(Message.amount, SqlString),
         ],
         q,
     )
@@ -63,6 +65,7 @@ def index():
         "uploaded_at": Message.uploaded_at,
         "category": Message.category,
         "reference_id": Message.reference_id,
+        "amount": Message.amount,
     }
     stmt = apply_sort(stmt, sort_map, sort_key, "received_at", direction)
 

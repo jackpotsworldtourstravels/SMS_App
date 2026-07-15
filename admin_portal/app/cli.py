@@ -3,8 +3,19 @@ from flask.cli import with_appcontext
 
 from app.extensions import db
 from app.models.admin_user import AdminUser, Role
+from app.models.device import Device
 from app.models.message import Message
 from app.services.reference_extraction import extract_reference_id
+
+# Test/dummy records created during development and Render deploy
+# verification — never real device or transaction data.
+_DUMMY_DEVICE_IDS = (
+    "3b367883-29c3-4465-9130-c12eab007f84",  # "Reference ID verify"
+    "99999999-9999-9999-9999-999999999999",  # "Render Deploy Test"
+)
+_STRAY_MESSAGE_DEVICE_ID = "10f52fd6-17d6-47bf-9b0a-849a3f32e897"  # real "vivo I2217" device
+_STRAY_MESSAGE_SENDER_RAW = "VM-BOBSMS-S"
+_STRAY_MESSAGE_CATEGORY = "UNKNOWN"
 
 
 @click.command("create-admin")
@@ -60,3 +71,34 @@ def backfill_reference_ids() -> None:
 
     db.session.commit()
     click.echo(f"Scanned {len(messages)} message(s), updated {updated} with a reference_id.")
+
+
+@click.command("cleanup-test-records")
+@with_appcontext
+def cleanup_test_records() -> None:
+    """One-off maintenance: remove known test/dummy devices and messages
+    created during development and Render deploy verification. Safe to
+    re-run — every deletion is keyed by exact ID, so once removed there is
+    nothing left to match."""
+
+    deleted_messages = Message.query.filter(
+        Message.device_id.in_(_DUMMY_DEVICE_IDS)
+    ).delete(synchronize_session=False)
+
+    deleted_stray = Message.query.filter(
+        Message.device_id == _STRAY_MESSAGE_DEVICE_ID,
+        Message.sender_raw == _STRAY_MESSAGE_SENDER_RAW,
+        Message.category == _STRAY_MESSAGE_CATEGORY,
+        Message.reference_id.is_(None),
+    ).delete(synchronize_session=False)
+
+    deleted_devices = Device.query.filter(
+        Device.id.in_(_DUMMY_DEVICE_IDS)
+    ).delete(synchronize_session=False)
+
+    db.session.commit()
+    click.echo(
+        f"Deleted {deleted_messages} dummy-device message(s), "
+        f"{deleted_stray} stray message(s), "
+        f"{deleted_devices} dummy device(s)."
+    )

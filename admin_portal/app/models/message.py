@@ -42,6 +42,11 @@ class Message(db.Model):
     sender_matched: str = db.Column(db.String(32), nullable=False)
     message_body: str = db.Column(db.Text, nullable=False)
 
+    # Transaction amount extracted from message_body at ingest time (e.g.
+    # "Rs.500", "INR 2,350", "₹750"). Nullable — not every message has an
+    # extractable amount (e.g. OTP messages).
+    amount = db.Column(db.Numeric(14, 2), index=True)
+
     category: str = db.Column(
         db.String(10), nullable=False, default=MessageCategory.UNKNOWN, index=True
     )
