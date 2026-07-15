@@ -28,14 +28,33 @@
             var target = parseInt(el.getAttribute("data-counter"), 10) || 0;
             var duration = 700;
             var start = null;
+            var done = false;
+
+            function finish() {
+                if (done) { return; }
+                done = true;
+                el.textContent = target.toLocaleString();
+            }
+
             function step(ts) {
+                if (done) { return; }
                 if (!start) { start = ts; }
                 var progress = Math.min((ts - start) / duration, 1);
                 var eased = 1 - Math.pow(1 - progress, 3);
                 el.textContent = Math.round(target * eased).toLocaleString();
-                if (progress < 1) { requestAnimationFrame(step); }
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    finish();
+                }
             }
+
+            // requestAnimationFrame can be throttled or never fire in
+            // backgrounded/non-composited tabs — this safety-net timeout
+            // guarantees the real value always lands even if the
+            // animation itself never gets a single frame.
             requestAnimationFrame(step);
+            setTimeout(finish, duration + 300);
         });
     }
 
