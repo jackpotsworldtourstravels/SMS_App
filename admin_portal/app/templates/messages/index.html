@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h1>Messages</h1>
+
+<form method="get" class="toolbar toolbar-wrap">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search message text or sender…">
+    <select name="category">
+        <option value="">All categories</option>
+        {% for c in categories %}
+        <option value="{{ c }}" {{ 'selected' if category == c }}>{{ c }}</option>
+        {% endfor %}
+    </select>
+    <select name="user_id">
+        <option value="">All users</option>
+        {% for u in users %}
+        <option value="{{ u.id }}" {{ 'selected' if user_id == u.id }}>{{ u.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="device_id">
+        <option value="">All devices</option>
+        {% for d in devices %}
+        <option value="{{ d.id }}" {{ 'selected' if device_id == d.id }}>{{ d.device_name or d.id }}</option>
+        {% endfor %}
+    </select>
+    <input type="date" name="date_from" value="{{ date_from }}">
+    <input type="date" name="date_to" value="{{ date_to }}">
+    <button type="submit" class="btn">Filter</button>
+</form>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Device</th>
+            <th>Sender ID</th>
+            <th>Category</th>
+            <th>Received</th>
+            <th>Uploaded</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for message in page.items %}
+        <tr class="message-row" data-target="msg-{{ message.id }}">
+            <td class="mono">{{ message.id }}</td>
+            <td>{{ message.end_user.name if message.end_user else '—' }}</td>
+            <td>{{ message.device.device_name if message.device else message.device_id }}</td>
+            <td class="mono">{{ message.sender_raw }}</td>
+            <td><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></td>
+            <td>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</td>
+            <td>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</td>
+        </tr>
+        <tr id="msg-{{ message.id }}" class="message-body-row" hidden>
+            <td colspan="7"><pre class="message-body">{{ message.message_body }}</pre></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="muted">No messages yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include 'components/pagination.html' %}
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.message-row').forEach(function (row) {
+    row.addEventListener('click', function () {
+        var target = document.getElementById(row.dataset.target);
+        if (target) { target.hidden = !target.hidden; }
+    });
+});
+</script>
+{% endblock %}

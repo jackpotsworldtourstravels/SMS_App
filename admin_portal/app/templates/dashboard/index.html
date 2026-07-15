@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ stats.devices_total }}</div><div class="stat-label">Registered Devices</div></div>
+    <div class="stat-card stat-online"><div class="stat-value">{{ stats.devices_online }}</div><div class="stat-label">Connected (Online)</div></div>
+    <div class="stat-card stat-offline"><div class="stat-value">{{ stats.devices_offline }}</div><div class="stat-label">Offline</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.users_total }}</div><div class="stat-label">Registered Users</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.messages_total }}</div><div class="stat-label">Total Messages</div></div>
+    <div class="stat-card stat-otp"><div class="stat-value">{{ stats.messages_otp }}</div><div class="stat-label">OTP Messages</div></div>
+    <div class="stat-card stat-credit"><div class="stat-value">{{ stats.messages_credit }}</div><div class="stat-label">CREDIT Messages</div></div>
+    <div class="stat-card stat-debit"><div class="stat-value">{{ stats.messages_debit }}</div><div class="stat-label">DEBIT Messages</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.messages_today }}</div><div class="stat-label">Messages Today</div></div>
+</div>
+
+<div class="chart-grid">
+    <div class="panel">
+        <h2>Messages per Day</h2>
+        <canvas id="chart-messages-per-day" height="220"></canvas>
+    </div>
+    <div class="panel">
+        <h2>Category Distribution</h2>
+        <canvas id="chart-category-distribution" height="220"></canvas>
+    </div>
+    <div class="panel">
+        <h2>Connected vs Offline</h2>
+        <canvas id="chart-device-status" height="220"></canvas>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Recent Activity</h2>
+    <ul id="recent-activity" class="activity-list">
+        <li class="muted">Loading…</li>
+    </ul>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}" data-dashboard-url="{{ url_for('api.api_v1.dashboard') }}"></script>
+{% endblock %}

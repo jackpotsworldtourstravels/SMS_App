@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ device.device_name or device.id }}{% endblock %}
+{% block content %}
+<h1>{{ device.device_name or 'Unnamed device' }}</h1>
+
+<div class="panel">
+    <dl class="detail-list">
+        <dt>Device ID</dt><dd class="mono">{{ device.id }}</dd>
+        <dt>User</dt><dd>{{ device.end_user.name if device.end_user else 'Unassigned' }}</dd>
+        <dt>Manufacturer / Model</dt><dd>{{ device.manufacturer or '—' }} {{ device.model or '' }}</dd>
+        <dt>Android Version</dt><dd>{{ device.android_version or '—' }}</dd>
+        <dt>App Version</dt><dd>{{ device.app_version_name or '—' }} (code {{ device.app_version_code or '—' }})</dd>
+        <dt>Registered</dt><dd>{{ device.registered_at.strftime('%Y-%m-%d %H:%M UTC') if device.registered_at else '—' }}</dd>
+        <dt>Last Seen</dt><dd>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M UTC') if device.last_seen_at else 'never' }}</dd>
+        <dt>Status</dt>
+        <dd>
+            {% if device.is_online %}<span class="status-pill status-online">Online</span>{% else %}<span class="status-pill status-offline">Offline</span>{% endif %}
+            {% if not device.is_active %}<span class="status-pill status-revoked">Revoked</span>{% endif %}
+        </dd>
+    </dl>
+
+    {% if device.is_active and current_user.has_role_at_least('admin') %}
+    <form method="post" action="{{ url_for('devices.revoke', device_id=device.id) }}" onsubmit="return confirm('Revoke this device? It will no longer be able to authenticate or appear as authorized.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger">Revoke Device</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <h2>Recent Messages</h2>
+    <a href="{{ url_for('messages.index', device_id=device.id) }}">View all messages from this device &raquo;</a>
+</div>
+{% endblock %}

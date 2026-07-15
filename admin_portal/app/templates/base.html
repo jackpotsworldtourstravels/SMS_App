@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Admin Portal{% endblock %} · sms_frwd</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">sms_frwd admin</div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">Dashboard</a>
+            <a href="{{ url_for('devices.index') }}" class="{{ 'active' if request.blueprint == 'devices' }}">Devices</a>
+            <a href="{{ url_for('users.index') }}" class="{{ 'active' if request.blueprint == 'users' }}">Users</a>
+            <a href="{{ url_for('messages.index') }}" class="{{ 'active' if request.blueprint == 'messages' }}">Messages</a>
+            {% if current_user.has_role_at_least('admin') %}
+            <a href="{{ url_for('audit.index') }}" class="{{ 'active' if request.blueprint == 'audit' }}">Audit Logs</a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">{{ current_user.username }} <span class="badge">{{ current_user.role }}</span></div>
+            <form method="post" action="{{ url_for('auth.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="link-button">Log out</button>
+            </form>
+        </div>
+    </aside>
+    <main class="content">
+        {% include 'components/flashes.html' %}
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% else %}
+<main class="content-standalone">
+    {% include 'components/flashes.html' %}
+    {% block content_standalone %}{% endblock %}
+</main>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

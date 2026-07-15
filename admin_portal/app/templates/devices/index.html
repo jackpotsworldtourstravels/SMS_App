@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Devices{% endblock %}
+{% block content %}
+<h1>Connected Devices</h1>
+
+<form method="get" class="toolbar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search device name, ID, model…">
+    <select name="status">
+        <option value="" {{ 'selected' if not status_filter }}>All statuses</option>
+        <option value="online" {{ 'selected' if status_filter == 'online' }}>Online</option>
+        <option value="offline" {{ 'selected' if status_filter == 'offline' }}>Offline</option>
+    </select>
+    <button type="submit" class="btn">Filter</button>
+</form>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            {% set base_args = request.args.to_dict() %}
+            <th>{% set a = dict(base_args, sort='device_name', dir='desc' if sort_key == 'device_name' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Device Name</a></th>
+            <th>Device ID</th>
+            <th>User</th>
+            <th>App Version</th>
+            <th>Android Version</th>
+            <th>{% set a = dict(base_args, sort='registered_at', dir='desc' if sort_key == 'registered_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Registered</a></th>
+            <th>{% set a = dict(base_args, sort='last_seen_at', dir='desc' if sort_key == 'last_seen_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Last Seen</a></th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for device in page.items %}
+        <tr>
+            <td><a href="{{ url_for('devices.detail', device_id=device.id) }}">{{ device.device_name or '—' }}</a></td>
+            <td class="mono">{{ device.id }}</td>
+            <td>{{ device.end_user.name if device.end_user else '—' }}</td>
+            <td>{{ device.app_version_name or '—' }}</td>
+            <td>{{ device.android_version or '—' }}</td>
+            <td>{{ device.registered_at.strftime('%Y-%m-%d %H:%M') if device.registered_at else '—' }}</td>
+            <td>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device.last_seen_at else 'never' }}</td>
+            <td>
+                {% if device.is_online %}
+                    <span class="status-pill status-online">Online</span>
+                {% else %}
+                    <span class="status-pill status-offline">Offline</span>
+                {% endif %}
+                {% if not device.is_active %}
+                    <span class="status-pill status-revoked">Revoked</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="muted">No devices registered yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include 'components/pagination.html' %}
+{% endblock %}
