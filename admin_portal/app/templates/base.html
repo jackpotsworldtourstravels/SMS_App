@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Dashboard{% endblock %} · SMS Forward Admin</title>
+    <script>
+        (function () {
+            var saved = localStorage.getItem("sfa-theme");
+            var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -99,6 +106,11 @@
                     <span data-sync-label>Checking…</span>
                 </span>
 
+                <button type="button" class="icon-btn" data-theme-toggle title="Toggle dark mode">
+                    <span data-theme-icon-light>{{ icons.icon('moon', size=16) }}</span>
+                    <span data-theme-icon-dark style="display:none;">{{ icons.icon('sun', size=16) }}</span>
+                </button>
+
                 <div class="dropdown quick-actions-dropdown" data-dropdown>
                     <button type="button" class="icon-btn" data-dropdown-trigger title="Quick actions">{{ icons.icon('plus', size=17) }}</button>
                     <div class="dropdown-panel">
@@ -138,6 +150,10 @@
 </div>
 {% else %}
 <main class="content-standalone">
+    <button type="button" class="icon-btn standalone-theme-toggle" data-theme-toggle title="Toggle dark mode">
+        <span data-theme-icon-light>{{ icons.icon('moon', size=16) }}</span>
+        <span data-theme-icon-dark style="display:none;">{{ icons.icon('sun', size=16) }}</span>
+    </button>
     {% include 'components/flashes.html' %}
     {% block content_standalone %}{% endblock %}
 </main>

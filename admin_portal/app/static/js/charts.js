@@ -16,10 +16,18 @@
         return COLORS[(category || "").toLowerCase()] || COLORS.accent;
     }
 
-    Chart.defaults.font.family = "Inter, -apple-system, sans-serif";
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = "#9195a6";
-    Chart.defaults.borderColor = "#eceef1";
+    function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function applyChartTheme() {
+        Chart.defaults.font.family = "Inter, -apple-system, sans-serif";
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = cssVar("--text-tertiary") || "#9195a6";
+        Chart.defaults.borderColor = cssVar("--border") || "#eceef1";
+    }
+
+    applyChartTheme();
 
     var charts = {};
 
@@ -80,7 +88,7 @@
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: "#eceef1" } } },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: cssVar("--border") || "#eceef1" } } },
             },
         };
         if (charts.messagesPerDay) { charts.messagesPerDay.destroy(); }
@@ -115,7 +123,7 @@
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: "#eceef1" } } },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: cssVar("--border") || "#eceef1" } } },
             },
         };
         if (charts.creditDebit) { charts.creditDebit.destroy(); }
@@ -133,7 +141,7 @@
                     data: data.map(function (d) { return d.count; }),
                     backgroundColor: data.map(function (d) { return categoryColor(d.category); }),
                     borderWidth: 2,
-                    borderColor: "#ffffff",
+                    borderColor: cssVar("--surface") || "#ffffff",
                 }],
             },
             options: { responsive: true, cutout: "68%", plugins: { legend: { position: "bottom", labels: { boxWidth: 10, padding: 14 } } } },
@@ -153,7 +161,7 @@
                     data: data.map(function (d) { return d.count; }),
                     backgroundColor: data.map(function (d) { return categoryColor(d.status); }),
                     borderWidth: 2,
-                    borderColor: "#ffffff",
+                    borderColor: cssVar("--surface") || "#ffffff",
                 }],
             },
             options: { responsive: true, cutout: "68%", plugins: { legend: { position: "bottom", labels: { boxWidth: 10, padding: 14 } } } },
@@ -241,5 +249,10 @@
         animateCounters();
         refresh();
         setInterval(refresh, 30000);
+    });
+
+    document.addEventListener("sfa:theme-change", function () {
+        applyChartTheme();
+        refresh();
     });
 })();

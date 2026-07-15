@@ -1,5 +1,35 @@
 (function () {
     var STORAGE_KEY = "sfa-sidebar-collapsed";
+    var THEME_KEY = "sfa-theme";
+
+    function initThemeToggle() {
+        var buttons = document.querySelectorAll("[data-theme-toggle]");
+        if (!buttons.length) { return; }
+
+        function syncIcons(theme) {
+            buttons.forEach(function (btn) {
+                var lightIcon = btn.querySelector("[data-theme-icon-light]");
+                var darkIcon = btn.querySelector("[data-theme-icon-dark]");
+                if (!lightIcon || !darkIcon) { return; }
+                // Button shows the icon for the theme you'd switch TO.
+                lightIcon.style.display = theme === "dark" ? "none" : "";
+                darkIcon.style.display = theme === "dark" ? "" : "none";
+            });
+        }
+
+        syncIcons(document.documentElement.getAttribute("data-theme") || "light");
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var current = document.documentElement.getAttribute("data-theme") || "light";
+                var next = current === "dark" ? "light" : "dark";
+                document.documentElement.setAttribute("data-theme", next);
+                localStorage.setItem(THEME_KEY, next);
+                syncIcons(next);
+                document.dispatchEvent(new CustomEvent("sfa:theme-change", { detail: { theme: next } }));
+            });
+        });
+    }
 
     function initSidebarCollapse() {
         var btn = document.querySelector("[data-sidebar-collapse-toggle]");
@@ -165,6 +195,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        initThemeToggle();
         initSidebarCollapse();
         initMobileSidebar();
         initDropdowns();
