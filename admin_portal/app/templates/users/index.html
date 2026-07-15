@@ -1,38 +1,61 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}Users{% endblock %}
 {% block content %}
 <div class="page-header">
-    <h1>Users</h1>
-    <a href="{{ url_for('users.new') }}" class="btn btn-primary">Add User</a>
+    <div>
+        <h1>Users</h1>
+        <div class="page-subtitle">End-users linked to authorized devices.</div>
+    </div>
+    <div class="page-header-actions">
+        <button type="button" class="btn" data-refresh>{{ icons.icon('refresh', size=15) }}Refresh</button>
+        <button type="button" class="btn" data-export-csv data-export-name="users">{{ icons.icon('download', size=15) }}Export</button>
+        <a href="{{ url_for('users.new') }}" class="btn btn-primary">{{ icons.icon('plus', size=15) }}Add User</a>
+    </div>
 </div>
 
 <form method="get" class="toolbar">
-    <input type="text" name="q" value="{{ q }}" placeholder="Search name or phone…">
+    <div class="topbar-search" style="width:240px;">
+        {{ icons.icon('search', size=15) }}
+        <input type="text" name="q" value="{{ q }}" placeholder="Search name or phone…">
+    </div>
     <select name="status">
         <option value="" {{ 'selected' if not status_filter }}>All statuses</option>
         <option value="active" {{ 'selected' if status_filter == 'active' }}>Active</option>
         <option value="disabled" {{ 'selected' if status_filter == 'disabled' }}>Disabled</option>
     </select>
-    <button type="submit" class="btn">Filter</button>
+    <button type="submit" class="btn btn-primary">{{ icons.icon('filter', size=14) }}Filter</button>
 </form>
 
-<table class="data-table">
+<div class="table-wrap">
+<table class="data-table" data-export-table>
     <thead>
         <tr>
-            <th>User Name</th>
-            <th>Device Name</th>
+            <th>User</th>
+            <th>Device</th>
             <th>Device ID</th>
             <th>Registered</th>
             <th>Status</th>
             <th>Last Seen</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for user in page.items %}
         {% set device = user.devices[0] if user.devices else None %}
         <tr>
-            <td>{{ user.name }}</td>
+            <td>
+                <div class="avatar-wrap">
+                    <div class="avatar">
+                        {{ user.name[:2]|upper }}
+                        <span class="avatar-online-dot {{ '' if (device and device.is_online) else 'offline' }}"></span>
+                    </div>
+                    <div>
+                        <div class="avatar-name">{{ user.name }}</div>
+                        <div class="avatar-sub">{{ user.phone_number or 'No phone on file' }}</div>
+                    </div>
+                </div>
+            </td>
             <td>{{ device.device_name if device else '—' }}</td>
             <td class="mono">{{ device.id if device else '—' }}</td>
             <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</td>
@@ -45,7 +68,7 @@
             </td>
             <td>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device and device.last_seen_at else '—' }}</td>
             <td class="row-actions">
-                <button type="button" class="link-button view-btn" data-modal-template="user-detail-{{ user.id }}">View</button>
+                <button type="button" class="link-button view-btn" data-modal-template="user-detail-{{ user.id }}">{{ icons.icon('eye', size=14) }}View</button>
                 <a href="{{ url_for('users.edit', user_id=user.id) }}">Edit</a>
                 {% if user.status == 'active' %}
                 <form method="post" action="{{ url_for('users.disable', user_id=user.id) }}" onsubmit="return confirm('Disable this user?');">
@@ -56,31 +79,50 @@
             </td>
         </tr>
         <template id="user-detail-{{ user.id }}">
-            <dl class="detail-list">
-                <dt>User ID</dt><dd>{{ user.id }}</dd>
-                <dt>Full Name</dt><dd>{{ user.name }}</dd>
-                <dt>Mobile Number</dt><dd>{{ user.phone_number or '-' }}</dd>
-                <dt>Status</dt>
-                <dd>
-                    {% if user.status == 'active' %}
-                        <span class="status-pill status-online">Active</span>
-                    {% else %}
-                        <span class="status-pill status-offline">Disabled</span>
-                    {% endif %}
-                </dd>
-                <dt>Notes</dt><dd>{{ user.notes or '-' }}</dd>
-                <dt>Device Name</dt><dd>{{ device.device_name if device else '—' }}</dd>
-                <dt>Device ID</dt><dd class="mono">{{ device.id if device else '—' }}</dd>
-                <dt>Registration Date</dt><dd>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '—' }}</dd>
-                <dt>Updated At</dt><dd>{{ user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else '—' }}</dd>
-                <dt>Created By</dt><dd>{{ admins_by_id.get(user.created_by_admin_id, '—') }}</dd>
-            </dl>
+            <div class="modal-section" style="display:flex; align-items:center; gap:14px;">
+                <div class="avatar" style="width:52px;height:52px;font-size:17px;">
+                    {{ user.name[:2]|upper }}
+                    <span class="avatar-online-dot {{ '' if (device and device.is_online) else 'offline' }}"></span>
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:700;">{{ user.name }}</div>
+                    <div class="avatar-sub">User ID #{{ user.id }} · {% if user.status == 'active' %}<span class="status-pill status-online">Active</span>{% else %}<span class="status-pill status-offline">Disabled</span>{% endif %}</div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('user-circle', size=13) }}Profile</div>
+                <dl class="detail-list">
+                    <dt>Full Name</dt><dd>{{ user.name }}</dd>
+                    <dt>Mobile Number</dt><dd>{{ user.phone_number or '-' }}</dd>
+                    <dt>Notes</dt><dd>{{ user.notes or '-' }}</dd>
+                    <dt>Registration Date</dt><dd>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '—' }}</dd>
+                    <dt>Updated At</dt><dd>{{ user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else '—' }}</dd>
+                    <dt>Created By</dt><dd>{{ admins_by_id.get(user.created_by_admin_id, '—') }}</dd>
+                </dl>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('smartphone', size=13) }}Linked Device</div>
+                <dl class="detail-list">
+                    <dt>Device Name</dt><dd>{{ device.device_name if device else '—' }}</dd>
+                    <dt>Device ID</dt><dd class="mono">{{ device.id if device else '—' }}</dd>
+                    <dt>Device Status</dt><dd>{% if device %}{% if device.is_online %}<span class="status-pill status-online">Online</span>{% else %}<span class="status-pill status-offline">Offline</span>{% endif %}{% else %}—{% endif %}</dd>
+                </dl>
+            </div>
         </template>
         {% else %}
-        <tr><td colspan="7" class="muted">No users yet.</td></tr>
+        <tr><td colspan="7">
+            <div class="empty-state">
+                <div class="empty-state-icon">{{ icons.icon('users', size=24) }}</div>
+                <div class="empty-state-title">No users yet</div>
+                <div class="empty-state-sub">Add a user and link them to an authorized device.</div>
+            </div>
+        </td></tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 {% include 'components/pagination.html' %}
 
@@ -88,7 +130,7 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
         <div class="modal-header">
             <h2 id="view-modal-title">User Details</h2>
-            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">{{ icons.icon('x', size=16) }}</button>
         </div>
         <div class="modal-body" id="view-modal-body"></div>
     </div>

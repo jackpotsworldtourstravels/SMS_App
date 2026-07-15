@@ -1,58 +1,94 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}Devices{% endblock %}
 {% block content %}
-<h1>Connected Devices</h1>
+<div class="page-header">
+    <div>
+        <h1>Connected Devices</h1>
+        <div class="page-subtitle">Android devices authorized to forward SMS into this portal.</div>
+    </div>
+    <div class="page-header-actions">
+        <button type="button" class="btn" data-refresh>{{ icons.icon('refresh', size=15) }}Refresh</button>
+    </div>
+</div>
 
 <form method="get" class="toolbar">
-    <input type="text" name="q" value="{{ q }}" placeholder="Search device name, ID, model…">
+    <div class="topbar-search" style="width:260px;">
+        {{ icons.icon('search', size=15) }}
+        <input type="text" name="q" value="{{ q }}" placeholder="Search device name, ID, model…">
+    </div>
     <select name="status">
         <option value="" {{ 'selected' if not status_filter }}>All statuses</option>
         <option value="online" {{ 'selected' if status_filter == 'online' }}>Online</option>
         <option value="offline" {{ 'selected' if status_filter == 'offline' }}>Offline</option>
     </select>
-    <button type="submit" class="btn">Filter</button>
+    <select name="sort">
+        <option value="device_name" {{ 'selected' if sort_key == 'device_name' }}>Sort: Name</option>
+        <option value="registered_at" {{ 'selected' if sort_key == 'registered_at' }}>Sort: Registered</option>
+        <option value="last_seen_at" {{ 'selected' if sort_key == 'last_seen_at' }}>Sort: Last Seen</option>
+    </select>
+    <button type="submit" class="btn btn-primary">{{ icons.icon('filter', size=14) }}Filter</button>
 </form>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            {% set base_args = request.args.to_dict() %}
-            <th>{% set a = dict(base_args, sort='device_name', dir='desc' if sort_key == 'device_name' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Device Name</a></th>
-            <th>Device ID</th>
-            <th>User</th>
-            <th>App Version</th>
-            <th>Android Version</th>
-            <th>{% set a = dict(base_args, sort='registered_at', dir='desc' if sort_key == 'registered_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Registered</a></th>
-            <th>{% set a = dict(base_args, sort='last_seen_at', dir='desc' if sort_key == 'last_seen_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('devices.index', **a) }}">Last Seen</a></th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for device in page.items %}
-        <tr>
-            <td><a href="{{ url_for('devices.detail', device_id=device.id) }}">{{ device.device_name or '—' }}</a></td>
-            <td class="mono">{{ device.id }}</td>
-            <td>{{ device.end_user.name if device.end_user else '—' }}</td>
-            <td>{{ device.app_version_name or '—' }}</td>
-            <td>{{ device.android_version or '—' }}</td>
-            <td>{{ device.registered_at.strftime('%Y-%m-%d %H:%M') if device.registered_at else '—' }}</td>
-            <td>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device.last_seen_at else 'never' }}</td>
-            <td>
-                {% if device.is_online %}
-                    <span class="status-pill status-online">Online</span>
-                {% else %}
-                    <span class="status-pill status-offline">Offline</span>
-                {% endif %}
-                {% if not device.is_active %}
-                    <span class="status-pill status-revoked">Revoked</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="8" class="muted">No devices registered yet.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% if page.items %}
+<div class="device-grid">
+    {% for device in page.items %}
+    <div class="device-card">
+        <div class="device-card-top">
+            <div style="display:flex; gap:12px; min-width:0;">
+                <div class="device-icon-wrap">{{ icons.icon('smartphone', size=20) }}</div>
+                <div style="min-width:0;">
+                    <a class="device-name" href="{{ url_for('devices.detail', device_id=device.id) }}" style="text-decoration:none; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ device.device_name or 'Unnamed device' }}</a>
+                    <div class="device-user">{{ device.end_user.name if device.end_user else 'Unassigned' }}</div>
+                </div>
+            </div>
+            {% if device.is_online %}
+                <span class="status-pill status-online">Online</span>
+            {% else %}
+                <span class="status-pill status-offline">Offline</span>
+            {% endif %}
+        </div>
+
+        <div class="device-meta-grid">
+            <div class="device-meta-item">
+                <div class="device-meta-label">App Version</div>
+                <div class="device-meta-value">{{ device.app_version_name or '—' }}</div>
+            </div>
+            <div class="device-meta-item">
+                <div class="device-meta-label">Android</div>
+                <div class="device-meta-value">{{ device.android_version or '—' }}</div>
+            </div>
+            <div class="device-meta-item">
+                <div class="device-meta-label">Registered</div>
+                <div class="device-meta-value">{{ device.registered_at.strftime('%Y-%m-%d') if device.registered_at else '—' }}</div>
+            </div>
+            <div class="device-meta-item">
+                <div class="device-meta-label">Last Sync</div>
+                <div class="device-meta-value">{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device.last_seen_at else 'Never' }}</div>
+            </div>
+        </div>
+
+        <div class="device-id-row">
+            <span class="mono">{{ device.id }}</span>
+            <button type="button" class="copy-btn" data-copy="{{ device.id }}" title="Copy device ID">{{ icons.icon('copy', size=14) }}</button>
+        </div>
+
+        <div class="device-card-footer">
+            {% if not device.is_active %}<span class="status-pill status-revoked">Revoked</span>{% else %}<span></span>{% endif %}
+            <a href="{{ url_for('devices.detail', device_id=device.id) }}" class="link-button">Details {{ icons.icon('arrow-up-right', size=13) }}</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="panel">
+    <div class="empty-state">
+        <div class="empty-state-icon">{{ icons.icon('smartphone', size=24) }}</div>
+        <div class="empty-state-title">No devices registered yet</div>
+        <div class="empty-state-sub">Devices appear here automatically once the Android app registers.</div>
+    </div>
+</div>
+{% endif %}
 
 {% include 'components/pagination.html' %}
 {% endblock %}

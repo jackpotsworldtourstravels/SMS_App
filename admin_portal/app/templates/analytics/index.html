@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Analytics</h1>
+        <div class="page-subtitle">Deeper trends across banks, users and activity hours.</div>
+    </div>
+</div>
+
+<div class="chart-grid cols-2">
+    <div class="panel">
+        <div class="panel-head"><h2>Daily Transactions</h2><span class="panel-head-meta">Last 14 days</span></div>
+        <canvas id="chart-transactions-per-day" height="220"></canvas>
+    </div>
+    <div class="panel">
+        <div class="panel-head"><h2>Hourly Activity</h2><span class="panel-head-meta">All time, by hour received</span></div>
+        <canvas id="chart-hourly-activity" height="220"></canvas>
+    </div>
+    <div class="panel">
+        <div class="panel-head"><h2>Top Banks</h2><span class="panel-head-meta">By transaction count</span></div>
+        {% if top_banks %}
+        <canvas id="chart-top-banks" height="220"></canvas>
+        {% else %}
+        <div class="empty-state"><div class="empty-state-icon">{{ icons.icon('landmark', size=22) }}</div><div class="empty-state-title">No transactions yet</div></div>
+        {% endif %}
+    </div>
+    <div class="panel">
+        <div class="panel-head"><h2>Top Users</h2><span class="panel-head-meta">By message volume</span></div>
+        {% if top_users %}
+        <canvas id="chart-top-users" height="220"></canvas>
+        {% else %}
+        <div class="empty-state"><div class="empty-state-icon">{{ icons.icon('users', size=22) }}</div><div class="empty-state-title">No linked users yet</div></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart.js') }}"></script>
+<script id="analytics-data" type="application/json">
+{
+    "transactionsPerDay": {{ transactions_per_day|tojson }},
+    "hourlyActivity": {{ hourly_activity|tojson }},
+    "topBanks": {{ top_banks|tojson }},
+    "topUsers": {{ top_users|tojson }}
+}
+</script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

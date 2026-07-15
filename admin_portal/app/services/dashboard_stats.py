@@ -41,10 +41,22 @@ def get_dashboard_stats() -> dict:
     messages_credit = _count_category(MessageCategory.CREDIT)
     messages_debit = _count_category(MessageCategory.DEBIT)
 
+    messages_unknown = _count_category(MessageCategory.UNKNOWN)
+
     messages_today = (
         db.session.scalar(
             select(func.count(Message.id)).where(
                 Message.received_at >= _today_start_utc()
+            )
+        )
+        or 0
+    )
+
+    transactions_today = (
+        db.session.scalar(
+            select(func.count(Message.id)).where(
+                Message.received_at >= _today_start_utc(),
+                Message.category.in_((MessageCategory.CREDIT, MessageCategory.DEBIT)),
             )
         )
         or 0
@@ -59,8 +71,90 @@ def get_dashboard_stats() -> dict:
         "messages_otp": messages_otp,
         "messages_credit": messages_credit,
         "messages_debit": messages_debit,
+        "messages_unknown": messages_unknown,
         "messages_today": messages_today,
+        "transactions_today": transactions_today,
+        "avg_processing_seconds": get_average_processing_seconds(),
     }
+
+
+def get_average_processing_seconds() -> float | None:
+    """Average delay between a message being received on-device and
+    landing in the portal, across messages that have both timestamps.
+    Purely descriptive — derived from existing received_at/uploaded_at
+    columns, no new data collected."""
+
+    rows = db.session.execute(
+        select(Message.received_at, Message.uploaded_at).where(
+            Message.received_at.is_not(None), Message.uploaded_at.is_not(None)
+        )
+    ).all()
+    if not rows:
+        return None
+
+    deltas = [
+        (uploaded_at - received_at).total_seconds()
+        for received_at, uploaded_at in rows
+    ]
+    positive_deltas = [d for d in deltas if d >= 0]
+    if not positive_deltas:
+        return None
+    return sum(positive_deltas) / len(positive_deltas)
+
+
+def get_transactions_per_day(days: int = 14) -> list[dict]:
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    day_expr = func.date(Message.received_at)
+    rows = db.session.execute(
+        select(
+            day_expr.label("day"),
+            Message.category,
+            func.count(Message.id).label("count"),
+        )
+        .where(
+            Message.received_at >= since,
+            Message.category.in_((MessageCategory.CREDIT, MessageCategory.DEBIT)),
+        )
+        .group_by(day_expr, Message.category)
+        .order_by(day_expr)
+    ).all()
+    return [
+        {"date": str(row.day), "category": row.category, "count": row.count}
+        for row in rows
+    ]
+
+
+def get_top_banks(limit: int = 6) -> list[dict]:
+    rows = db.session.execute(
+        select(Message.sender_matched, func.count(Message.id).label("count"))
+        .where(Message.category.in_((MessageCategory.CREDIT, MessageCategory.DEBIT)))
+        .group_by(Message.sender_matched)
+        .order_by(func.count(Message.id).desc())
+        .limit(limit)
+    ).all()
+    return [{"bank": bank, "count": count} for bank, count in rows]
+
+
+def get_top_users(limit: int = 6) -> list[dict]:
+    rows = db.session.execute(
+        select(EndUser.name, func.count(Message.id).label("count"))
+        .join(Message, Message.end_user_id == EndUser.id)
+        .group_by(EndUser.id, EndUser.name)
+        .order_by(func.count(Message.id).desc())
+        .limit(limit)
+    ).all()
+    return [{"user": name, "count": count} for name, count in rows]
+
+
+def get_hourly_activity() -> list[dict]:
+    hour_expr = func.extract("hour", Message.received_at)
+    rows = db.session.execute(
+        select(hour_expr.label("hour"), func.count(Message.id).label("count"))
+        .group_by(hour_expr)
+        .order_by(hour_expr)
+    ).all()
+    counts_by_hour = {int(row.hour): row.count for row in rows}
+    return [{"hour": h, "count": counts_by_hour.get(h, 0)} for h in range(24)]
 
 
 def get_messages_per_day(days: int = 14) -> list[dict]:

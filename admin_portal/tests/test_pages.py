@@ -52,7 +52,7 @@ def test_dashboard_renders_stats(app, logged_in_client):
     response = logged_in_client.get("/dashboard")
     assert response.status_code == 200
     assert b"Dashboard" in response.data
-    assert b"Connected (Online)" in response.data
+    assert b"Connected Devices" in response.data
 
 
 def test_dashboard_api_json(app, logged_in_client):
@@ -94,9 +94,9 @@ def test_messages_page_shows_reference_id_and_falls_back_to_dash(app, logged_in_
     _seed(app)
     response = logged_in_client.get("/messages/")
     assert b"REF998877" in response.data
-    # The OTP-seeded message has no reference_id and must show a dash,
-    # not an empty cell or "None".
-    assert b">-</td>" in response.data
+    # The OTP-seeded message has no reference_id and must show the empty
+    # badge state, not "None" or a blank cell.
+    assert b'badge-mono empty">-</span>' in response.data
 
 
 def test_messages_page_search_by_reference_id(app, logged_in_client):
@@ -116,8 +116,8 @@ def test_messages_page_shows_amount_and_falls_back_to_dash(app, logged_in_client
     _seed(app)
     response = logged_in_client.get("/messages/")
     assert b"500.00" in response.data
-    # The OTP-seeded message has no amount and must show a dash.
-    assert b">-</td>" in response.data
+    # The OTP-seeded message has no amount and must show the neutral dash state.
+    assert b'amount-cell amount-neutral">-</span>' in response.data
 
 
 def test_messages_page_search_by_amount(app, logged_in_client):

@@ -42,6 +42,7 @@ def create_app(config_object: str | None = None) -> Flask:
 
 
 def _register_blueprints(app: Flask) -> None:
+    from app.blueprints.analytics import analytics_bp
     from app.blueprints.api import api_bp
     from app.blueprints.api.v1 import v1_bp
     from app.blueprints.audit import audit_bp
@@ -49,6 +50,8 @@ def _register_blueprints(app: Flask) -> None:
     from app.blueprints.dashboard import dashboard_bp
     from app.blueprints.devices import devices_bp
     from app.blueprints.messages import messages_bp
+    from app.blueprints.settings import settings_bp
+    from app.blueprints.transactions import transactions_bp
     from app.blueprints.users import users_bp
 
     app.register_blueprint(auth_bp)
@@ -56,6 +59,9 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(devices_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(messages_bp)
+    app.register_blueprint(transactions_bp)
+    app.register_blueprint(analytics_bp)
+    app.register_blueprint(settings_bp)
     app.register_blueprint(audit_bp)
     app.register_blueprint(api_bp)
 

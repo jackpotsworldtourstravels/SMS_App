@@ -3,36 +3,138 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Admin Portal{% endblock %} · Transaction SMS App</title>
+    <title>{% block title %}Dashboard{% endblock %} · SMS Forward Admin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block head %}{% endblock %}
 </head>
-<body>
+<body{% if current_user.is_authenticated %} data-authed="1"{% endif %}>
+{% import 'components/icons.html' as icons %}
 {% if current_user.is_authenticated %}
+<div class="sidebar-overlay" data-sidebar-overlay></div>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sidebar-brand">Transaction SMS App</div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.5l6.5 2.8v5.4c0 4.6-2.7 7.9-6.5 9.3-3.8-1.4-6.5-4.7-6.5-9.3V5.3Z"/>
+                    <path d="M8.7 11.8l2.1 2.1 4.1-4.6"/>
+                    <circle cx="16.8" cy="5.6" r="1.4" fill="#fff" stroke="none"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                SMS Forward
+                <small>Admin Console</small>
+            </div>
+        </div>
+
         <nav class="sidebar-nav">
-            <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">Dashboard</a>
-            <a href="{{ url_for('devices.index') }}" class="{{ 'active' if request.blueprint == 'devices' }}">Devices</a>
-            <a href="{{ url_for('users.index') }}" class="{{ 'active' if request.blueprint == 'users' }}">Users</a>
-            <a href="{{ url_for('messages.index') }}" class="{{ 'active' if request.blueprint == 'messages' }}">Messages</a>
+            <div class="sidebar-section-label">Overview</div>
+            <a href="{{ url_for('dashboard.index') }}" class="nav-item {{ 'active' if request.blueprint == 'dashboard' }}">
+                {{ icons.icon('dashboard') }}<span class="label">Dashboard</span>
+            </a>
+            <a href="{{ url_for('analytics.index') }}" class="nav-item {{ 'active' if request.blueprint == 'analytics' }}">
+                {{ icons.icon('analytics') }}<span class="label">Analytics</span>
+            </a>
+
+            <div class="sidebar-section-label">Monitoring</div>
+            <a href="{{ url_for('users.index') }}" class="nav-item {{ 'active' if request.blueprint == 'users' }}">
+                {{ icons.icon('users') }}<span class="label">Users</span>
+            </a>
+            <a href="{{ url_for('devices.index') }}" class="nav-item {{ 'active' if request.blueprint == 'devices' }}">
+                {{ icons.icon('smartphone') }}<span class="label">Devices</span>
+            </a>
+            <a href="{{ url_for('messages.index') }}" class="nav-item {{ 'active' if request.blueprint == 'messages' }}">
+                {{ icons.icon('message') }}<span class="label">Messages</span>
+            </a>
+            <a href="{{ url_for('transactions.index') }}" class="nav-item {{ 'active' if request.blueprint == 'transactions' }}">
+                {{ icons.icon('transactions') }}<span class="label">Transactions</span>
+            </a>
+
+            <div class="sidebar-section-label">System</div>
             {% if current_user.has_role_at_least('admin') %}
-            <a href="{{ url_for('audit.index') }}" class="{{ 'active' if request.blueprint == 'audit' }}">Audit Logs</a>
+            <a href="{{ url_for('audit.index') }}" class="nav-item {{ 'active' if request.blueprint == 'audit' }}">
+                {{ icons.icon('shield') }}<span class="label">Audit Logs</span>
+            </a>
             {% endif %}
+            <a href="{{ url_for('settings.index') }}" class="nav-item {{ 'active' if request.blueprint == 'settings' }}">
+                {{ icons.icon('settings') }}<span class="label">Settings</span>
+            </a>
         </nav>
+
         <div class="sidebar-footer">
-            <div class="sidebar-user">{{ current_user.username }} <span class="badge">{{ current_user.role }}</span></div>
-            <form method="post" action="{{ url_for('auth.logout') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="link-button">Log out</button>
-            </form>
+            <button type="button" class="sidebar-collapse-btn" data-sidebar-collapse-toggle>
+                {{ icons.icon('chevron-left', size=15) }}<span class="label">Collapse</span>
+            </button>
+            <div class="sidebar-user-card">
+                <div class="sidebar-avatar">{{ current_user.username[:2]|upper }}</div>
+                <div class="sidebar-user-meta">
+                    <div class="sidebar-user-name">{{ current_user.username }}</div>
+                    <div class="sidebar-user-role">{{ current_user.role }}</div>
+                </div>
+                <form method="post" action="{{ url_for('auth.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="sidebar-logout-btn" title="Log out">{{ icons.icon('logout', size=16) }}</button>
+                </form>
+            </div>
         </div>
     </aside>
-    <main class="content">
-        {% include 'components/flashes.html' %}
-        {% block content %}{% endblock %}
-    </main>
+
+    <div class="main-area">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="hamburger-btn" data-sidebar-mobile-toggle>{{ icons.icon('menu') }}</button>
+                <div class="breadcrumb">
+                    <div class="breadcrumb-trail">SMS Forward Admin{% if request.blueprint %} / {{ request.blueprint|capitalize }}{% endif %}</div>
+                    <div class="breadcrumb-current">{% block page_title %}{{ self.title() }}{% endblock %}</div>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <form class="topbar-search" action="{{ url_for('messages.index') }}" method="get">
+                    {{ icons.icon('search', size=16) }}
+                    <input type="text" name="q" placeholder="Search messages, sender, ref ID…">
+                </form>
+                <span class="topbar-clock" data-live-clock>--:--:--</span>
+                <span class="sync-pill offline" data-sync-pill>
+                    <span class="sync-dot"></span>
+                    <span data-sync-label>Checking…</span>
+                </span>
+
+                <div class="dropdown quick-actions-dropdown" data-dropdown>
+                    <button type="button" class="icon-btn" data-dropdown-trigger title="Quick actions">{{ icons.icon('plus', size=17) }}</button>
+                    <div class="dropdown-panel">
+                        <div class="dropdown-label">Quick actions</div>
+                        <a class="dropdown-item" href="{{ url_for('users.new') }}">{{ icons.icon('users', size=15) }}Add user</a>
+                        <a class="dropdown-item" href="{{ url_for('devices.index') }}">{{ icons.icon('smartphone', size=15) }}View devices</a>
+                        <a class="dropdown-item" href="{{ url_for('messages.index') }}">{{ icons.icon('message', size=15) }}View messages</a>
+                        <a class="dropdown-item" href="{{ url_for('transactions.index') }}">{{ icons.icon('transactions', size=15) }}View transactions</a>
+                    </div>
+                </div>
+
+                <div class="dropdown" data-dropdown>
+                    <button type="button" class="profile-trigger" data-dropdown-trigger>
+                        <span class="sidebar-avatar">{{ current_user.username[:2]|upper }}</span>
+                        <span class="profile-trigger-name">{{ current_user.username }}</span>
+                        {{ icons.icon('chevron-down', size=14, class='icon-chevron') }}
+                    </button>
+                    <div class="dropdown-panel">
+                        <div class="dropdown-label">Signed in as</div>
+                        <div class="dropdown-item" style="cursor:default;">{{ icons.icon('mail', size=15) }}{{ current_user.email }}</div>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url_for('settings.index') }}">{{ icons.icon('settings', size=15) }}Settings</a>
+                        <form method="post" action="{{ url_for('auth.logout') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="dropdown-item">{{ icons.icon('logout', size=15) }}Log out</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            {% include 'components/flashes.html' %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 </div>
 {% else %}
 <main class="content-standalone">
@@ -40,6 +142,7 @@
     {% block content_standalone %}{% endblock %}
 </main>
 {% endif %}
+<script src="{{ url_for('static', filename='js/ui.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

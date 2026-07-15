@@ -1,8 +1,12 @@
+{% import 'components/icons.html' as icons %}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="flashes">
       {% for category, message in messages %}
-        <div class="flash flash-{{ category }}">{{ message }}</div>
+        <div class="flash flash-{{ category }}">
+            {% if category == 'success' %}{{ icons.icon('check-circle', size=15) }}{% else %}{{ icons.icon('alert-circle', size=15) }}{% endif %}
+            {{ message }}
+        </div>
       {% endfor %}
     </div>
   {% endif %}

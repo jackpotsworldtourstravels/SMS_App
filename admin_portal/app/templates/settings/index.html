@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Settings</h1>
+        <div class="page-subtitle">Account and platform configuration.</div>
+    </div>
+</div>
+
+<div class="panel placeholder-panel">
+    <div class="empty-state-icon">{{ icons.icon('settings', size=28) }}</div>
+    <div class="empty-state-title">Settings coming soon</div>
+    <div class="empty-state-sub">Platform configuration options aren't available yet.<br>Your account, role and password are managed by a superadmin.</div>
+</div>
+
+<div class="panel">
+    <div class="modal-section-title">{{ icons.icon('user-circle', size=13) }}Your Account</div>
+    <dl class="detail-list">
+        <dt>Username</dt><dd>{{ current_user.username }}</dd>
+        <dt>Email</dt><dd>{{ current_user.email }}</dd>
+        <dt>Role</dt><dd><span class="role-badge">{{ current_user.role }}</span></dd>
+    </dl>
+</div>
+{% endblock %}

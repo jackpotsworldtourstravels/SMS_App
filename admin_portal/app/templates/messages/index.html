@@ -1,10 +1,23 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}Messages{% endblock %}
 {% block content %}
-<h1>Messages</h1>
+<div class="page-header">
+    <div>
+        <h1>Messages</h1>
+        <div class="page-subtitle">Every SMS forwarded from an authorized device, categorized and searchable.</div>
+    </div>
+    <div class="page-header-actions">
+        <button type="button" class="btn" data-refresh>{{ icons.icon('refresh', size=15) }}Refresh</button>
+        <button type="button" class="btn" data-export-csv data-export-name="messages">{{ icons.icon('download', size=15) }}Export</button>
+    </div>
+</div>
 
 <form method="get" class="toolbar toolbar-wrap">
-    <input type="text" name="q" value="{{ q }}" placeholder="Search message text, sender or reference ID…">
+    <div class="topbar-search" style="width:260px;">
+        {{ icons.icon('search', size=15) }}
+        <input type="text" name="q" value="{{ q }}" placeholder="Search message text, sender or reference ID…">
+    </div>
     <select name="category">
         <option value="">All categories</option>
         {% for c in categories %}
@@ -25,22 +38,23 @@
     </select>
     <input type="date" name="date_from" value="{{ date_from }}">
     <input type="date" name="date_to" value="{{ date_to }}">
-    <button type="submit" class="btn">Filter</button>
+    <button type="submit" class="btn btn-primary">{{ icons.icon('filter', size=14) }}Filter</button>
 </form>
 
-<table class="data-table">
+<div class="table-wrap">
+<table class="data-table" data-export-table>
     <thead>
         <tr>
             {% set base_args = request.args.to_dict() %}
             <th>ID</th>
             <th>User</th>
-            <th>{% set a = dict(base_args, sort='amount', dir='desc' if sort_key == 'amount' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Amount</a></th>
+            <th>{% set a = dict(base_args, sort='amount', dir='desc' if sort_key == 'amount' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Amount {{ icons.icon('chevron-down', size=12) }}</a></th>
             <th>Device</th>
-            <th>Sender ID</th>
-            <th>{% set a = dict(base_args, sort='category', dir='desc' if sort_key == 'category' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Category</a></th>
-            <th>{% set a = dict(base_args, sort='reference_id', dir='desc' if sort_key == 'reference_id' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Reference ID</a></th>
-            <th>{% set a = dict(base_args, sort='received_at', dir='desc' if sort_key == 'received_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Received</a></th>
-            <th>{% set a = dict(base_args, sort='uploaded_at', dir='desc' if sort_key == 'uploaded_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Uploaded</a></th>
+            <th>Sender</th>
+            <th>{% set a = dict(base_args, sort='category', dir='desc' if sort_key == 'category' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Category {{ icons.icon('chevron-down', size=12) }}</a></th>
+            <th>{% set a = dict(base_args, sort='reference_id', dir='desc' if sort_key == 'reference_id' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Reference ID {{ icons.icon('chevron-down', size=12) }}</a></th>
+            <th>{% set a = dict(base_args, sort='received_at', dir='desc' if sort_key == 'received_at' and direction == 'asc' else 'asc') %}<a href="{{ url_for('messages.index', **a) }}">Received {{ icons.icon('chevron-down', size=12) }}</a></th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -49,45 +63,103 @@
         <tr>
             <td class="mono">{{ message.id }}</td>
             <td>{{ message.end_user.name if message.end_user else '—' }}</td>
-            <td class="mono">{{ message.amount if message.amount is not none else '-' }}</td>
+            <td>
+                {% if message.amount is not none %}
+                <span class="amount-cell {{ 'amount-credit' if message.category == 'CREDIT' else ('amount-debit' if message.category == 'DEBIT' else 'amount-neutral') }}">
+                    {{ '+' if message.category == 'CREDIT' else ('-' if message.category == 'DEBIT' else '') }}₹{{ '{:,.2f}'.format(message.amount) }}
+                </span>
+                {% else %}
+                <span class="amount-cell amount-neutral">-</span>
+                {% endif %}
+            </td>
             <td>{{ message.device.device_name if message.device else message.device_id }}</td>
             <td class="mono">{{ message.sender_raw }}</td>
             <td><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></td>
-            <td class="mono">{{ message.reference_id or '-' }}</td>
+            <td>{% if message.reference_id %}<span class="badge-mono">{{ message.reference_id }}</span>{% else %}<span class="badge-mono empty">-</span>{% endif %}</td>
             <td>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</td>
-            <td>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</td>
+            <td><span class="status-pill status-online">Synced</span></td>
             <td class="row-actions">
-                <button type="button" class="link-button view-btn" data-modal-template="msg-detail-{{ message.id }}">View</button>
+                <button type="button" class="link-button view-btn" data-modal-template="msg-detail-{{ message.id }}">{{ icons.icon('eye', size=14) }}View</button>
             </td>
         </tr>
         <template id="msg-detail-{{ message.id }}">
-            <dl class="detail-list">
-                <dt>User</dt><dd>{{ message.end_user.name if message.end_user else '—' }}</dd>
-                <dt>Device</dt><dd>{{ message.device.device_name if message.device else message.device_id }}</dd>
-                <dt>Sender</dt><dd class="mono">{{ message.sender_raw }}</dd>
-                <dt>Amount</dt><dd>{{ message.amount if message.amount is not none else '-' }}</dd>
-                <dt>Category</dt><dd><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></dd>
-                <dt>Reference ID</dt><dd class="mono">{{ message.reference_id or '-' }}</dd>
-                <dt>Received Time</dt><dd>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</dd>
-                <dt>Synced Time</dt><dd>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</dd>
-                <dt>Message Status</dt><dd><span class="status-pill status-online">Synced</span></dd>
-            </dl>
-            <label class="field-label" for="msg-body-{{ message.id }}">SMS Body (Complete Original Message)</label>
-            <textarea id="msg-body-{{ message.id }}" class="modal-body-text" readonly>{{ message.message_body }}</textarea>
+            <div class="highlight-grid">
+                <div class="highlight-tile">
+                    <div class="highlight-tile-label">Amount</div>
+                    <div class="highlight-tile-value mono {{ 'amount-credit' if message.category == 'CREDIT' else ('amount-debit' if message.category == 'DEBIT' else '') }}">{{ '₹{:,.2f}'.format(message.amount) if message.amount is not none else '-' }}</div>
+                </div>
+                <div class="highlight-tile">
+                    <div class="highlight-tile-label">Category</div>
+                    <div class="highlight-tile-value"><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></div>
+                </div>
+                <div class="highlight-tile">
+                    <div class="highlight-tile-label">Reference ID</div>
+                    <div class="highlight-tile-value mono">{% if message.reference_id %}<span class="badge-mono">{{ message.reference_id }}</span>{% else %}-{% endif %}</div>
+                </div>
+                <div class="highlight-tile">
+                    <div class="highlight-tile-label">Sender</div>
+                    <div class="highlight-tile-value mono" style="font-size:13px;">{{ message.sender_raw }}</div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('message', size=13) }}Original SMS</div>
+                <label class="field-label" for="msg-body-{{ message.id }}">Complete, unmodified message body</label>
+                <textarea id="msg-body-{{ message.id }}" class="modal-body-text" readonly>{{ message.message_body }}</textarea>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('credit-card', size=13) }}Transaction Details</div>
+                <dl class="detail-list">
+                    <dt>User</dt><dd>{{ message.end_user.name if message.end_user else '—' }}</dd>
+                    <dt>Received Time</dt><dd>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</dd>
+                    <dt>Synced Time</dt><dd>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</dd>
+                    <dt>Message Status</dt><dd><span class="status-pill status-online">Synced</span></dd>
+                </dl>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('smartphone', size=13) }}Device Information</div>
+                <dl class="detail-list">
+                    <dt>Device</dt><dd>{{ message.device.device_name if message.device else message.device_id }}</dd>
+                    <dt>Device ID</dt><dd class="mono">{{ message.device_id }}</dd>
+                </dl>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">{{ icons.icon('sparkles', size=13) }}Extraction Details</div>
+                <div class="modal-card">
+                    <dl class="detail-list" style="grid-template-columns: 150px 1fr;">
+                        <dt>Amount parsed</dt><dd>{{ 'Yes' if message.amount is not none else 'Not found' }}</dd>
+                        <dt>Reference parsed</dt><dd>{{ 'Yes' if message.reference_id else 'Not found' }}</dd>
+                        <dt>Auto-category</dt><dd>{{ message.category }}</dd>
+                    </dl>
+                </div>
+            </div>
         </template>
         {% else %}
-        <tr><td colspan="10" class="muted">No messages yet.</td></tr>
+        <tr><td colspan="10">
+            <div class="empty-state">
+                <div class="empty-state-icon">{{ icons.icon('message', size=24) }}</div>
+                <div class="empty-state-title">No messages yet</div>
+                <div class="empty-state-sub">Messages forwarded from authorized devices will appear here.</div>
+            </div>
+        </td></tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 {% include 'components/pagination.html' %}
 
 <div class="modal-overlay" id="view-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="view-modal-title">
         <div class="modal-header">
-            <h2 id="view-modal-title">Message Details</h2>
-            <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+            <div>
+                <h2 id="view-modal-title">Message Details</h2>
+                <div class="modal-header-meta">Original SMS content and extraction results</div>
+            </div>
+            <button type="button" class="modal-close" data-modal-close aria-label="Close">{{ icons.icon('x', size=16) }}</button>
         </div>
         <div class="modal-body" id="view-modal-body"></div>
     </div>

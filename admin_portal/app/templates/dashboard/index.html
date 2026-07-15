@@ -1,38 +1,103 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
-
-<div class="stat-grid">
-    <div class="stat-card"><div class="stat-value">{{ stats.devices_total }}</div><div class="stat-label">Registered Devices</div></div>
-    <div class="stat-card stat-online"><div class="stat-value">{{ stats.devices_online }}</div><div class="stat-label">Connected (Online)</div></div>
-    <div class="stat-card stat-offline"><div class="stat-value">{{ stats.devices_offline }}</div><div class="stat-label">Offline</div></div>
-    <div class="stat-card"><div class="stat-value">{{ stats.users_total }}</div><div class="stat-label">Registered Users</div></div>
-    <div class="stat-card"><div class="stat-value">{{ stats.messages_total }}</div><div class="stat-label">Total Messages</div></div>
-    <div class="stat-card stat-otp"><div class="stat-value">{{ stats.messages_otp }}</div><div class="stat-label">OTP Messages</div></div>
-    <div class="stat-card stat-credit"><div class="stat-value">{{ stats.messages_credit }}</div><div class="stat-label">CREDIT Messages</div></div>
-    <div class="stat-card stat-debit"><div class="stat-value">{{ stats.messages_debit }}</div><div class="stat-label">DEBIT Messages</div></div>
-    <div class="stat-card"><div class="stat-value">{{ stats.messages_today }}</div><div class="stat-label">Messages Today</div></div>
+<div class="page-header">
+    <div>
+        <h1>Dashboard</h1>
+        <div class="page-subtitle">Real-time overview of SMS forwarding and transaction monitoring.</div>
+    </div>
 </div>
 
-<div class="chart-grid">
+<div class="stat-grid">
+    <div class="stat-card tone-blue">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('users', size=18) }}</div>
+            <span class="stat-trend flat" data-trend="users_total">—</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.users_total }}">0</div>
+        <div class="stat-label">Registered Users</div>
+    </div>
+    <div class="stat-card tone-green">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('smartphone', size=18) }}</div>
+            <span class="stat-trend flat" data-trend="devices_online">{{ stats.devices_online }} online</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.devices_total }}">0</div>
+        <div class="stat-label">Connected Devices</div>
+    </div>
+    <div class="stat-card tone-blue">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('message', size=18) }}</div>
+            <span class="stat-trend flat" data-trend="messages_today">—</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.messages_today }}">0</div>
+        <div class="stat-label">Today's SMS</div>
+    </div>
+    <div class="stat-card tone-blue">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('transactions', size=18) }}</div>
+            <span class="stat-trend flat" data-trend="transactions_today">—</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.transactions_today }}">0</div>
+        <div class="stat-label">Transactions Today</div>
+    </div>
+    <div class="stat-card tone-green">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('arrow-down-right', size=18) }}</div>
+            <span class="stat-trend up">{{ icons.icon('trend-up', size=12) }}Credit</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.messages_credit }}">0</div>
+        <div class="stat-label">Credits</div>
+    </div>
+    <div class="stat-card tone-red">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('arrow-up-right', size=18) }}</div>
+            <span class="stat-trend down">{{ icons.icon('trend-down', size=12) }}Debit</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.messages_debit }}">0</div>
+        <div class="stat-label">Debits</div>
+    </div>
+    <div class="stat-card tone-gray">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('alert-circle', size=18) }}</div>
+            <span class="stat-trend flat">Unclassified</span>
+        </div>
+        <div class="stat-value" data-counter="{{ stats.messages_unknown }}">0</div>
+        <div class="stat-label">Unclassified SMS</div>
+    </div>
+    <div class="stat-card tone-amber">
+        <div class="stat-card-top">
+            <div class="stat-icon">{{ icons.icon('timer', size=18) }}</div>
+            <span class="stat-trend flat">Avg</span>
+        </div>
+        <div class="stat-value">{{ '%.1fs'|format(stats.avg_processing_seconds) if stats.avg_processing_seconds is not none else '—' }}</div>
+        <div class="stat-label">Avg Processing Time</div>
+    </div>
+</div>
+
+<div class="chart-grid cols-2">
     <div class="panel">
-        <h2>Messages per Day</h2>
+        <div class="panel-head"><h2>Daily SMS Volume</h2><span class="panel-head-meta">Last 14 days</span></div>
         <canvas id="chart-messages-per-day" height="220"></canvas>
     </div>
     <div class="panel">
-        <h2>Category Distribution</h2>
+        <div class="panel-head"><h2>Credit vs Debit</h2><span class="panel-head-meta">All time</span></div>
+        <canvas id="chart-credit-debit" height="220"></canvas>
+    </div>
+    <div class="panel">
+        <div class="panel-head"><h2>Category Distribution</h2></div>
         <canvas id="chart-category-distribution" height="220"></canvas>
     </div>
     <div class="panel">
-        <h2>Connected vs Offline</h2>
+        <div class="panel-head"><h2>Connected vs Offline</h2></div>
         <canvas id="chart-device-status" height="220"></canvas>
     </div>
 </div>
 
 <div class="panel">
-    <h2>Recent Activity</h2>
-    <ul id="recent-activity" class="activity-list">
+    <div class="panel-head"><h2>Recent Activity</h2></div>
+    <ul id="recent-activity" class="timeline">
         <li class="muted">Loading…</li>
     </ul>
 </div>

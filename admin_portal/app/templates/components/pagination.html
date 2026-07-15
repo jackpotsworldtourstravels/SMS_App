@@ -1,20 +1,21 @@
+{% import 'components/icons.html' as icons %}
 {% if page.pages > 1 %}
 <nav class="pagination">
     {% set args = request.args.to_dict() %}
     {% if page.has_prev %}
         {% set _ = args.update({'page': page.prev_num}) %}
-        <a href="{{ url_for(request.endpoint, **args) }}">&laquo; Prev</a>
+        <a href="{{ url_for(request.endpoint, **args) }}">{{ icons.icon('chevron-left', size=13) }} Prev</a>
     {% else %}
-        <span class="disabled">&laquo; Prev</span>
+        <span class="disabled">{{ icons.icon('chevron-left', size=13) }} Prev</span>
     {% endif %}
 
     <span class="pagination-status">Page {{ page.page }} of {{ page.pages }} ({{ page.total }} total)</span>
 
     {% if page.has_next %}
         {% set _ = args.update({'page': page.next_num}) %}
-        <a href="{{ url_for(request.endpoint, **args) }}">Next &raquo;</a>
+        <a href="{{ url_for(request.endpoint, **args) }}">Next {{ icons.icon('chevron-right', size=13) }}</a>
     {% else %}
-        <span class="disabled">Next &raquo;</span>
+        <span class="disabled">Next {{ icons.icon('chevron-right', size=13) }}</span>
     {% endif %}
 </nav>
 {% endif %}
