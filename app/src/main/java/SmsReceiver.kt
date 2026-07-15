@@ -38,7 +38,7 @@ class SmsReceiver : BroadcastReceiver() {
         // for the core ID as a substring rather than an exact match.
         val BANK_SENDER_IDS = setOf(
             "SBIBNK", "SBIUPI", "HDFCBK", "ICICIB", "ICICIT", "AXISBK", "KMBANK",
-            "PNBBNK", "PNBOTP", "BOBBNK", "CANBNK", "CANOTP", "UNIONB",
+            "PNBBNK", "PNBOTP", "BOBBNK", "BOBSMS", "CANBNK", "CANOTP", "UNIONB",
             "INDBNK", "BOIIND", "CBIIND", "UCOBNK", "IOBBNK", "PSBANK",
             "IDBIBK", "YESBNK", "INDUSB", "IDFCFB", "FEDBNK", "AUBANK",
             "RBLBNK", "DCBBNK", "CSBBNK", "BNDBNK", "CUBBNK", "KARBNK",

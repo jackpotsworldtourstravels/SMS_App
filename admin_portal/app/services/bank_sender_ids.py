@@ -4,7 +4,7 @@
 # back to its own hardcoded copy if this endpoint is unreachable).
 BANK_SENDER_IDS = {
     "SBIBNK", "SBIUPI", "HDFCBK", "ICICIB", "ICICIT", "AXISBK", "KMBANK",
-    "PNBBNK", "PNBOTP", "BOBBNK", "CANBNK", "CANOTP", "UNIONB",
+    "PNBBNK", "PNBOTP", "BOBBNK", "BOBSMS", "CANBNK", "CANOTP", "UNIONB",
     "INDBNK", "BOIIND", "CBIIND", "UCOBNK", "IOBBNK", "PSBANK",
     "IDBIBK", "YESBNK", "INDUSB", "IDFCFB", "FEDBNK", "AUBANK",
     "RBLBNK", "DCBBNK", "CSBBNK", "BNDBNK", "CUBBNK", "KARBNK",

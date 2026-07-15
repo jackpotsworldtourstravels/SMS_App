@@ -22,18 +22,16 @@ android {
 
     buildTypes {
         debug {
-            // Host machine's LAN IP, where the Flask dev server runs
-            // during development, reachable from a real phone on the same
-            // Wi-Fi. (10.0.2.2 would be used instead if testing against
-            // the Android Emulator specifically, which aliases it to the
-            // host's localhost.)
-            buildConfigField("String", "BASE_URL", "\"http://192.168.1.16:5000/\"")
+            // Live backend on Render. (Swap to the host machine's LAN IP,
+            // e.g. "http://192.168.1.16:5000/", for local dev against a
+            // `flask run --host=0.0.0.0` instance instead.)
+            buildConfigField("String", "BASE_URL", "\"https://sms-app-rcr4.onrender.com/\"")
         }
         release {
             optimization {
                 enable = false
             }
-            buildConfigField("String", "BASE_URL", "\"https://CHANGE_ME.example.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://sms-app-rcr4.onrender.com/\"")
         }
     }
     compileOptions {
