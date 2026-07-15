@@ -47,6 +47,18 @@ from app.services.categorization import categorize_message
             "UNKNOWN",
         ),
         ("", "UNKNOWN"),
+        (
+            "Rs.1.00 Dr. from A/C XXXXXX0000 and Cr. to 9999999999@ybl. "
+            "Ref:000000000000. AvlBal:Rs1000.00(2026:01:01 00:00:00). "
+            "Not you? Call 18005700/5000-BOB",
+            "DEBIT",
+        ),
+        (
+            "Dear BOB UPI User: Your account is credited with INR 1.00 on "
+            "2026-01-01 12:00:00 PM by UPI Ref No 000000000000; AvlBal: "
+            "Rs1000.00 - BOB",
+            "CREDIT",
+        ),
     ],
 )
 def test_categorize_message(body, expected):

@@ -17,7 +17,7 @@ _CATEGORY_RULES: list[tuple[str, re.Pattern]] = [
         MessageCategory.DEBIT,
         re.compile(
             r"\bdebit(ed)?\b|\bwithdrawn\b|\bspent\b|has been debited|paid to|"
-            r"debited from",
+            r"debited from|\bDr\.",
             re.IGNORECASE,
         ),
     ),
@@ -25,7 +25,7 @@ _CATEGORY_RULES: list[tuple[str, re.Pattern]] = [
         MessageCategory.CREDIT,
         re.compile(
             r"\bcredit(ed)?\b|\bdeposited\b|received in your account|\bcashback\b|"
-            r"\brefund(ed)?\b|credited to",
+            r"\brefund(ed)?\b|credited to|\bCr\.",
             re.IGNORECASE,
         ),
     ),
