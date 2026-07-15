@@ -33,6 +33,7 @@ def create_app(config_object: str | None = None) -> Flask:
     _register_blueprints(app)
     _register_cli(app)
     _register_template_helpers(app)
+    _register_health_check(app)
 
     if app.config.get("ENABLE_STATUS_SWEEP"):
         _start_status_sweep(app)
@@ -79,6 +80,12 @@ def _register_template_helpers(app: Flask) -> None:
     @app.context_processor
     def inject_nav_flags():
         return {}
+
+
+def _register_health_check(app: Flask) -> None:
+    @app.get("/healthz")
+    def healthz():
+        return {"status": "ok"}, 200
 
 
 def _configure_logging(app: Flask) -> None:
