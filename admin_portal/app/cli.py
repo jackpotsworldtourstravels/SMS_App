@@ -54,6 +54,31 @@ def create_admin(username: str, email: str, password: str, role: str) -> None:
     click.echo(f"Created {role} user '{username}' ({email}).")
 
 
+@click.command("set-admin-password")
+@click.option("--username", prompt=True)
+@click.option(
+    "--password",
+    prompt=True,
+    hide_input=True,
+    confirmation_prompt=True,
+)
+@with_appcontext
+def set_admin_password(username: str, password: str) -> None:
+    """Reset an existing portal login's password. There is no
+    self-service reset UI in v1, so this is the only way to rotate an
+    AdminUser's password after creation."""
+
+    user = AdminUser.query.filter_by(username=username).first()
+    if user is None:
+        click.echo(f"Error: username '{username}' does not exist.", err=True)
+        raise SystemExit(1)
+
+    user.set_password(password)
+    db.session.commit()
+
+    click.echo(f"Password updated for user '{username}'.")
+
+
 @click.command("backfill-reference-ids")
 @with_appcontext
 def backfill_reference_ids() -> None:

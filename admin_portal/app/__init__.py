@@ -74,6 +74,7 @@ def _register_cli(app: Flask) -> None:
     from app import cli
 
     app.cli.add_command(cli.create_admin)
+    app.cli.add_command(cli.set_admin_password)
     app.cli.add_command(cli.backfill_reference_ids)
     app.cli.add_command(cli.backfill_amounts)
     app.cli.add_command(cli.cleanup_test_records)
