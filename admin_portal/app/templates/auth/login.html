@@ -1,31 +1,121 @@
 {% extends "base.html" %}
+{% import 'components/icons.html' as icons %}
 {% block title %}Log in{% endblock %}
+{% block head %}
+<script>
+    // This login page is a dedicated light-theme design regardless of the
+    // app-wide dark mode preference saved from a previous session.
+    document.documentElement.setAttribute("data-theme", "light");
+</script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
 {% block content_standalone %}
-<div class="login-shell">
-    <div class="login-logo">
-        <div class="brand-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.5l6.5 2.8v5.4c0 4.6-2.7 7.9-6.5 9.3-3.8-1.4-6.5-4.7-6.5-9.3V5.3Z"/>
-                <path d="M8.7 11.8l2.1 2.1 4.1-4.6"/>
-                <circle cx="16.8" cy="5.6" r="1.4" fill="#fff" stroke="none"/>
-            </svg>
-        </div>
-        <div class="login-title">SMS Forward Admin</div>
+<div class="sfa-login-page">
+    <div class="sfa-login-topbar">
+        <span class="sfa-login-topbar-item">{{ icons.icon('mail', size=14) }}Support</span>
+        <span class="sfa-login-topbar-sep"></span>
+        <span class="sfa-login-topbar-item">{{ icons.icon('chevron-down', size=12) }}English</span>
     </div>
-    <div class="login-subtitle">Secure console for SMS forwarding &amp; transaction monitoring</div>
-    <div class="login-card">
-        <form method="post" novalidate>
-            {{ form.hidden_tag() }}
-            <div class="field">
-                {{ form.username.label }}
-                {{ form.username(autofocus=true) }}
+
+    <div class="sfa-login-left">
+        <div class="sfa-login-left-inner">
+            <div class="sfa-login-brand">
+                <div class="sfa-login-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.5l6.5 2.8v5.4c0 4.6-2.7 7.9-6.5 9.3-3.8-1.4-6.5-4.7-6.5-9.3V5.3Z"/>
+                        <path d="M8.7 11.8l2.1 2.1 4.1-4.6"/>
+                        <circle cx="16.8" cy="5.6" r="1.4" fill="#fff" stroke="none"/>
+                    </svg>
+                </div>
+                <div class="sfa-login-appname">SMS Forward Admin</div>
             </div>
-            <div class="field">
-                {{ form.password.label }}
-                {{ form.password() }}
+            <p class="sfa-login-tagline">Secure SMS Monitoring &amp; Transaction Management</p>
+
+            <ul class="sfa-login-features">
+                <li>{{ icons.icon('check-circle', size=17) }}<span>Real-time SMS Forwarding</span></li>
+                <li>{{ icons.icon('check-circle', size=17) }}<span>Automatic Transaction Detection</span></li>
+                <li>{{ icons.icon('check-circle', size=17) }}<span>Reference ID Extraction</span></li>
+                <li>{{ icons.icon('check-circle', size=17) }}<span>Device Monitoring</span></li>
+                <li>{{ icons.icon('check-circle', size=17) }}<span>Secure Admin Portal</span></li>
+            </ul>
+
+            <div class="sfa-login-stats">
+                <div class="sfa-login-stat">{{ icons.icon('shield', size=16) }}<span>Enterprise Security</span></div>
+                <div class="sfa-login-stat">{{ icons.icon('lock', size=16) }}<span>Role-Based Access</span></div>
+                <div class="sfa-login-stat">{{ icons.icon('wifi', size=16) }}<span>Real-time Synchronization</span></div>
             </div>
-            {{ form.submit(class="btn btn-primary btn-block") }}
-        </form>
+        </div>
+    </div>
+
+    <div class="sfa-login-right">
+        <div class="sfa-login-card-wrap">
+            <div class="sfa-login-mobile-brand">
+                <div class="sfa-login-logo sfa-login-logo-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.5l6.5 2.8v5.4c0 4.6-2.7 7.9-6.5 9.3-3.8-1.4-6.5-4.7-6.5-9.3V5.3Z"/>
+                        <path d="M8.7 11.8l2.1 2.1 4.1-4.6"/>
+                        <circle cx="16.8" cy="5.6" r="1.4" fill="#fff" stroke="none"/>
+                    </svg>
+                </div>
+                <div class="sfa-login-appname-sm">SMS Forward Admin</div>
+            </div>
+
+            <div class="sfa-login-card">
+                <h1 class="sfa-login-welcome">Welcome Back <span aria-hidden="true">👋</span></h1>
+                <p class="sfa-login-subtext">Sign in to access your dashboard.</p>
+
+                <form method="post" novalidate class="sfa-login-form" id="sfa-login-form">
+                    {{ form.hidden_tag() }}
+
+                    <div class="sfa-field">
+                        <label for="{{ form.username.id }}">Username</label>
+                        <div class="sfa-input-wrap">
+                            <span class="sfa-input-icon">{{ icons.icon('user', size=17) }}</span>
+                            {{ form.username(autofocus=true, placeholder="Enter your username", autocomplete="username") }}
+                        </div>
+                    </div>
+
+                    <div class="sfa-field">
+                        <label for="{{ form.password.id }}">Password</label>
+                        <div class="sfa-input-wrap">
+                            <span class="sfa-input-icon">{{ icons.icon('lock', size=17) }}</span>
+                            {{ form.password(placeholder="Enter your password", autocomplete="current-password", id="sfa-password-input") }}
+                            <button type="button" class="sfa-password-toggle" id="sfa-password-toggle" aria-label="Show password" aria-pressed="false">
+                                <span data-icon-show>{{ icons.icon('eye', size=17) }}</span>
+                                <span data-icon-hide hidden>{{ icons.icon('eye-off', size=17) }}</span>
+                            </button>
+                        </div>
+                        <div class="sfa-capslock-hint" id="sfa-capslock-hint" role="status" hidden>
+                            {{ icons.icon('alert-circle', size=13) }}Caps Lock is on
+                        </div>
+                    </div>
+
+                    <div class="sfa-field-row">
+                        <label class="sfa-checkbox">
+                            <input type="checkbox" name="remember_me">
+                            <span>Remember me</span>
+                        </label>
+                        <button type="button" class="sfa-forgot-link" id="sfa-forgot-btn" aria-expanded="false" aria-controls="sfa-forgot-tip">Forgot password?</button>
+                    </div>
+                    <p class="sfa-forgot-tip" id="sfa-forgot-tip" hidden>Password resets aren't self-service yet — contact your administrator.</p>
+
+                    <button type="submit" class="sfa-submit-btn" id="sfa-submit-btn">Sign In</button>
+                </form>
+            </div>
+
+            <div class="sfa-login-footer">
+                <span>Version 1.0</span>
+                <span class="sfa-login-footer-dot"></span>
+                <span>&copy; <span id="sfa-current-year">2026</span> SMS Forward Admin</span>
+                <span class="sfa-login-footer-dot"></span>
+                <span>Privacy Policy</span>
+                <span class="sfa-login-footer-dot"></span>
+                <span>Terms of Service</span>
+            </div>
+        </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
 {% endblock %}
