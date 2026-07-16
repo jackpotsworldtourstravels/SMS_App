@@ -60,11 +60,11 @@
             </div>
             <div class="device-meta-item">
                 <div class="device-meta-label">Registered</div>
-                <div class="device-meta-value">{{ device.registered_at.strftime('%Y-%m-%d') if device.registered_at else '—' }}</div>
+                <div class="device-meta-value">{{ device.registered_at|ist('%d %b %Y') }}</div>
             </div>
             <div class="device-meta-item">
                 <div class="device-meta-label">Last Sync</div>
-                <div class="device-meta-value">{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device.last_seen_at else 'Never' }}</div>
+                <div class="device-meta-value">{{ device.last_seen_at|ist if device.last_seen_at else 'Never' }}</div>
             </div>
         </div>
 

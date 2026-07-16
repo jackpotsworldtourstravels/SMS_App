@@ -76,7 +76,7 @@
             <td class="mono">{{ message.sender_raw }}</td>
             <td><span class="status-pill category-{{ message.category|lower }}">{{ message.category }}</span></td>
             <td>{% if message.reference_id %}<span class="badge-mono">{{ message.reference_id }}</span>{% else %}<span class="badge-mono empty">-</span>{% endif %}</td>
-            <td>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</td>
+            <td>{{ message.received_at|ist }}</td>
             <td><span class="status-pill status-online">Synced</span></td>
             <td class="row-actions">
                 <button type="button" class="link-button view-btn" data-modal-template="msg-detail-{{ message.id }}">{{ icons.icon('eye', size=14) }}View</button>
@@ -112,8 +112,8 @@
                 <div class="modal-section-title">{{ icons.icon('credit-card', size=13) }}Transaction Details</div>
                 <dl class="detail-list">
                     <dt>User</dt><dd>{{ message.end_user.name if message.end_user else '—' }}</dd>
-                    <dt>Received Time</dt><dd>{{ message.received_at.strftime('%Y-%m-%d %H:%M:%S') if message.received_at else '—' }}</dd>
-                    <dt>Synced Time</dt><dd>{{ message.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if message.uploaded_at else '—' }}</dd>
+                    <dt>Received Time</dt><dd>{{ message.received_at|ist }}</dd>
+                    <dt>Synced Time</dt><dd>{{ message.uploaded_at|ist }}</dd>
                     <dt>Message Status</dt><dd><span class="status-pill status-online">Synced</span></dd>
                 </dl>
             </div>

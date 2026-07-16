@@ -16,6 +16,30 @@
         return COLORS[(category || "").toLowerCase()] || COLORS.accent;
     }
 
+    // Matches the backend's |ist Jinja filter format: "15 Jul 2026, 02:35 PM".
+    // Built from formatToParts (not a plain Intl format string) so the
+    // hour is always zero-padded and AM/PM is always uppercase, regardless
+    // of locale quirks in the browser's Intl implementation.
+    function formatIst(dateInput) {
+        var d = new Date(dateInput);
+        if (isNaN(d.getTime())) { return ""; }
+        var parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: "Asia/Kolkata",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        }).formatToParts(d);
+        var get = function (type) {
+            var p = parts.find(function (part) { return part.type === type; });
+            return p ? p.value : "";
+        };
+        return get("day") + " " + get("month") + " " + get("year") + ", " +
+            get("hour") + ":" + get("minute") + " " + get("dayPeriod").toUpperCase();
+    }
+
     function cssVar(name) {
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
@@ -188,7 +212,7 @@
         items.forEach(function (item, idx) {
             var li = document.createElement("li");
             li.style.animationDelay = (idx * 30) + "ms";
-            var when = item.at ? new Date(item.at).toLocaleString() : "";
+            var when = item.at ? formatIst(item.at) : "";
             var dot = document.createElement("span");
             dot.className = "timeline-dot " + timelineDotClass(item.type);
             var body = document.createElement("div");

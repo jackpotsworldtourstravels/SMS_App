@@ -91,6 +91,13 @@ def _register_template_helpers(app: Flask) -> None:
     def inject_nav_flags():
         return {}
 
+    from app.utils.timezone import to_ist
+
+    @app.template_filter("ist")
+    def ist_filter(dt, fmt: str = "%d %b %Y, %I:%M %p") -> str:
+        converted = to_ist(dt)
+        return converted.strftime(fmt) if converted else "—"
+
 
 def _register_health_check(app: Flask) -> None:
     @app.get("/healthz")

@@ -79,7 +79,17 @@
         if (!el) { return; }
         function tick() {
             var now = new Date();
-            el.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            // toUpperCase() so the am/pm marker is always "AM"/"PM" — some
+            // locales render it lowercase depending on the browser's Intl
+            // implementation.
+            var time = now.toLocaleTimeString("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+            }).toUpperCase();
+            el.textContent = time + " IST";
         }
         tick();
         setInterval(tick, 1000);

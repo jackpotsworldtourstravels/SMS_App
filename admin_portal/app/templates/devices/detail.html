@@ -29,8 +29,8 @@
         <dt>Manufacturer / Model</dt><dd>{{ device.manufacturer or '—' }} {{ device.model or '' }}</dd>
         <dt>Android Version</dt><dd>{{ device.android_version or '—' }}</dd>
         <dt>App Version</dt><dd>{{ device.app_version_name or '—' }} (code {{ device.app_version_code or '—' }})</dd>
-        <dt>Registered</dt><dd>{{ device.registered_at.strftime('%Y-%m-%d %H:%M UTC') if device.registered_at else '—' }}</dd>
-        <dt>Last Seen</dt><dd>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M UTC') if device.last_seen_at else 'never' }}</dd>
+        <dt>Registered</dt><dd>{{ device.registered_at|ist }}</dd>
+        <dt>Last Seen</dt><dd>{{ device.last_seen_at|ist if device.last_seen_at else 'never' }}</dd>
     </dl>
 
     {% if device.is_active and current_user.has_role_at_least('admin') %}

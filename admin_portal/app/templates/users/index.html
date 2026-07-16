@@ -58,7 +58,7 @@
             </td>
             <td>{{ device.device_name if device else '—' }}</td>
             <td class="mono">{{ device.id if device else '—' }}</td>
-            <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</td>
+            <td>{{ user.created_at|ist('%d %b %Y') }}</td>
             <td>
                 {% if user.status == 'active' %}
                     <span class="status-pill status-online">Active</span>
@@ -66,7 +66,7 @@
                     <span class="status-pill status-offline">Disabled</span>
                 {% endif %}
             </td>
-            <td>{{ device.last_seen_at.strftime('%Y-%m-%d %H:%M') if device and device.last_seen_at else '—' }}</td>
+            <td>{{ device.last_seen_at|ist if device and device.last_seen_at else '—' }}</td>
             <td class="row-actions">
                 <button type="button" class="link-button view-btn" data-modal-template="user-detail-{{ user.id }}">{{ icons.icon('eye', size=14) }}View</button>
                 <a href="{{ url_for('users.edit', user_id=user.id) }}">Edit</a>
@@ -96,8 +96,8 @@
                     <dt>Full Name</dt><dd>{{ user.name }}</dd>
                     <dt>Mobile Number</dt><dd>{{ user.phone_number or '-' }}</dd>
                     <dt>Notes</dt><dd>{{ user.notes or '-' }}</dd>
-                    <dt>Registration Date</dt><dd>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '—' }}</dd>
-                    <dt>Updated At</dt><dd>{{ user.updated_at.strftime('%Y-%m-%d %H:%M:%S') if user.updated_at else '—' }}</dd>
+                    <dt>Registration Date</dt><dd>{{ user.created_at|ist }}</dd>
+                    <dt>Updated At</dt><dd>{{ user.updated_at|ist }}</dd>
                     <dt>Created By</dt><dd>{{ admins_by_id.get(user.created_by_admin_id, '—') }}</dd>
                 </dl>
             </div>

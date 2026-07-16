@@ -80,7 +80,7 @@
             <td class="mono">{{ txn.sender_raw }}</td>
             <td>{{ txn.end_user.name if txn.end_user else '—' }}</td>
             <td>{{ txn.device.device_name if txn.device else txn.device_id }}</td>
-            <td>{{ txn.received_at.strftime('%Y-%m-%d %H:%M:%S') if txn.received_at else '—' }}</td>
+            <td>{{ txn.received_at|ist }}</td>
             <td><span class="status-pill status-online">Synced</span></td>
         </tr>
         {% else %}
