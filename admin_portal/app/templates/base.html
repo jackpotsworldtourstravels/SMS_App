@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Dashboard{% endblock %} · SMS Forward Admin</title>
+    <title>{% block title %}Dashboard{% endblock %} · Transaction SMS Admin</title>
     <script>
         (function () {
             var saved = localStorage.getItem("sfa-theme");
@@ -29,7 +29,7 @@
                 </svg>
             </div>
             <div class="brand-text">
-                SMS Forward
+                Transaction SMS
                 <small>Admin Console</small>
             </div>
         </div>
@@ -91,7 +91,7 @@
             <div class="topbar-left">
                 <button type="button" class="hamburger-btn" data-sidebar-mobile-toggle>{{ icons.icon('menu') }}</button>
                 <div class="breadcrumb">
-                    <div class="breadcrumb-trail">SMS Forward Admin{% if request.blueprint %} / {{ request.blueprint|capitalize }}{% endif %}</div>
+                    <div class="breadcrumb-trail">Transaction SMS Admin{% if request.blueprint %} / {{ request.blueprint|capitalize }}{% endif %}</div>
                     <div class="breadcrumb-current">{% block page_title %}{{ self.title() }}{% endblock %}</div>
                 </div>
             </div>
