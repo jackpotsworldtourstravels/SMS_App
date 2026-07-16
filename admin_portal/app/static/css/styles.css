@@ -869,6 +869,25 @@ h2 { font-size: 15.5px; font-weight: 700; margin: 0 0 14px; color: var(--text); 
 .placeholder-panel .empty-state-icon { width: 64px; height: 64px; margin: 0 auto 18px; background: var(--brand-50); color: var(--brand-600); }
 
 /* ==================================================
+   DOWNLOAD APP PAGE
+   ================================================== */
+
+.download-page { display: flex; justify-content: center; padding: 20px 0; }
+.download-card { max-width: 380px; width: 100%; text-align: center; }
+.download-qr-wrap {
+    display: inline-flex;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 16px;
+}
+.download-qr-wrap img { display: block; width: 220px; height: 220px; border-radius: var(--radius-sm); }
+.download-caption { font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.download-version { font-size: 12.5px; color: var(--text-tertiary); margin: 0 0 20px; }
+
+/* ==================================================
    RESPONSIVE
    ================================================== */
 

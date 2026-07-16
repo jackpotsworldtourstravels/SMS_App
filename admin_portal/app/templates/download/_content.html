@@ -1,0 +1,29 @@
+{% import 'components/icons.html' as icons %}
+<div class="download-page">
+    <div class="download-card panel">
+        <div class="sidebar-brand" style="justify-content:center; padding:0 0 18px;">
+            <div class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.5l6.5 2.8v5.4c0 4.6-2.7 7.9-6.5 9.3-3.8-1.4-6.5-4.7-6.5-9.3V5.3Z"/>
+                    <path d="M8.7 11.8l2.1 2.1 4.1-4.6"/>
+                    <circle cx="16.8" cy="5.6" r="1.4" fill="#fff" stroke="none"/>
+                </svg>
+            </div>
+            <div class="brand-text" style="text-align:left;">
+                Transaction SMS
+                <small>Admin Console</small>
+            </div>
+        </div>
+
+        <h1 style="text-align:center;">Download App</h1>
+        <p class="page-subtitle" style="text-align:center; margin-bottom:24px;">Get the official Transaction SMS Android app</p>
+
+        <div class="download-qr-wrap">
+            <img src="{{ url_for('download.qr_code') }}" alt="QR code that links to the Transaction SMS APK download" width="256" height="256">
+        </div>
+        <p class="download-caption">Scan to Download Transaction SMS App</p>
+        <p class="download-version">Version {{ apk_version }}</p>
+
+        <a href="{{ apk_url }}" class="btn btn-primary btn-block" download>{{ icons.icon('download', size=16) }}Download APK</a>
+    </div>
+</div>

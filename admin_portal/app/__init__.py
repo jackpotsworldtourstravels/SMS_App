@@ -49,6 +49,7 @@ def _register_blueprints(app: Flask) -> None:
     from app.blueprints.auth import auth_bp
     from app.blueprints.dashboard import dashboard_bp
     from app.blueprints.devices import devices_bp
+    from app.blueprints.download import download_bp
     from app.blueprints.messages import messages_bp
     from app.blueprints.settings import settings_bp
     from app.blueprints.transactions import transactions_bp
@@ -62,6 +63,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(transactions_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(download_bp)
     app.register_blueprint(audit_bp)
     app.register_blueprint(api_bp)
 

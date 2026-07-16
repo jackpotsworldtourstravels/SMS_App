@@ -66,6 +66,9 @@
             <a href="{{ url_for('settings.index') }}" class="nav-item {{ 'active' if request.blueprint == 'settings' }}">
                 {{ icons.icon('settings') }}<span class="label">Settings</span>
             </a>
+            <a href="{{ url_for('download.index') }}" class="nav-item {{ 'active' if request.blueprint == 'download' }}">
+                {{ icons.icon('download') }}<span class="label">Download App</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">
