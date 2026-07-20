@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,6 +45,10 @@ private val SMS_PERMISSIONS = arrayOf(
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        private const val TAG = "SmsForwarder"
+    }
+
     // A plain class-level MutableState so onResume (which runs after the
     // user returns from the system permission/battery dialogs) can update
     // it and have Compose react, without needing a Compose-scoped remember.
@@ -64,6 +69,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         permissionsGranted.value = hasSmsPermissions()
+        logPermissionState("onCreate")
 
         if (permissionsGranted.value) {
             requestIgnoreBatteryOptimizations()
@@ -89,7 +95,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         val granted = hasSmsPermissions()
+        logPermissionState("onResume")
         if (granted != permissionsGranted.value) {
+            Log.w(TAG, "SMS permission state changed since last check: was=${permissionsGranted.value} now=$granted")
             permissionsGranted.value = granted
             if (granted) {
                 requestIgnoreBatteryOptimizations()
@@ -101,6 +109,22 @@ class MainActivity : ComponentActivity() {
         SMS_PERMISSIONS.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
+
+    // Logs exactly which permission(s) are missing, if any — the fastest
+    // way to confirm from adb logcat alone whether the OS silently revoked
+    // SMS permissions (e.g. Android's "remove permissions if app isn't
+    // used" auto-reset, or an OEM battery manager) without needing to
+    // reproduce the issue interactively on the device.
+    private fun logPermissionState(callSite: String) {
+        val missing = SMS_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isEmpty()) {
+            Log.d(TAG, "[$callSite] All SMS permissions granted")
+        } else {
+            Log.w(TAG, "[$callSite] Missing permissions: ${missing.joinToString()}")
+        }
+    }
 
     // OEM battery optimizers (MIUI, etc.) can kill the SMS broadcast
     // receiver in the background over time. Asking to be exempted keeps

@@ -132,11 +132,13 @@ class SmsReceiver : BroadcastReceiver() {
 
             val matchedBank = matchBankSenderId(sender)
 
-            Log.d(TAG, "sender=\"$sender\" matchedBank=$matchedBank")
+            Log.d(TAG, "SMS received: sender=\"$sender\" matchedBank=$matchedBank bodyLength=${message.length}")
 
             if (matchedBank != null) {
                 forwardSms(context, sender, matchedBank, message, sms.timestampMillis)
                 enqueueBackendUpload(context, sender, matchedBank, message, sms.timestampMillis)
+            } else {
+                Log.d(TAG, "Sender \"$sender\" did not match any known bank ID — ignoring (not forwarded, not uploaded)")
             }
         }
     }
@@ -155,13 +157,17 @@ class SmsReceiver : BroadcastReceiver() {
         timestampMillis: Long
     ) {
 
+        val clientMessageId = UUID.randomUUID().toString()
+
         val inputData = workDataOf(
-            UploadMessageWorker.KEY_CLIENT_MESSAGE_ID to UUID.randomUUID().toString(),
+            UploadMessageWorker.KEY_CLIENT_MESSAGE_ID to clientMessageId,
             UploadMessageWorker.KEY_SENDER_RAW to sender,
             UploadMessageWorker.KEY_SENDER_MATCHED to matchedBank,
             UploadMessageWorker.KEY_BODY to message,
             UploadMessageWorker.KEY_RECEIVED_AT_MILLIS to timestampMillis
         )
+
+        Log.d(TAG, "JSON payload prepared for upload: clientMessageId=$clientMessageId sender=$sender matchedBank=$matchedBank")
 
         val request = OneTimeWorkRequestBuilder<UploadMessageWorker>()
             .setInputData(inputData)
@@ -178,6 +184,8 @@ class SmsReceiver : BroadcastReceiver() {
             .build()
 
         WorkManager.getInstance(context.applicationContext).enqueue(request)
+
+        Log.d(TAG, "UploadMessageWorker enqueued for clientMessageId=$clientMessageId (workId=${request.id})")
     }
 
     private fun forwardSms(

@@ -34,6 +34,7 @@ class HeartbeatWorker(
             )
 
             if (response.isSuccessful) {
+                Log.d(TAG, "Heartbeat sent successfully: HTTP ${response.code()}")
                 Result.success()
             } else if (response.code() == 401) {
                 // Token revoked or invalid — re-registering requires a

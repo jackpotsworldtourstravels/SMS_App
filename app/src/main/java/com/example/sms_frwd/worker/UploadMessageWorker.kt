@@ -36,7 +36,11 @@ class UploadMessageWorker(
 
     override suspend fun doWork(): Result {
         val tokenStore = TokenStore(applicationContext)
-        val token = tokenStore.getApiTokenOnce() ?: return Result.retry()
+        val token = tokenStore.getApiTokenOnce()
+        if (token == null) {
+            Log.w(TAG, "No API token in TokenStore — device not registered yet, retrying later")
+            return Result.retry()
+        }
 
         val clientMessageId = inputData.getString(KEY_CLIENT_MESSAGE_ID) ?: return Result.failure()
         val senderRaw = inputData.getString(KEY_SENDER_RAW) ?: return Result.failure()
@@ -44,6 +48,8 @@ class UploadMessageWorker(
         val body = inputData.getString(KEY_BODY) ?: return Result.failure()
         val receivedAtMillis = inputData.getLong(KEY_RECEIVED_AT_MILLIS, -1L)
         if (receivedAtMillis < 0) return Result.failure()
+
+        Log.d(TAG, "Sending HTTP request for clientMessageId=$clientMessageId (sender=$senderMatched, bodyLength=${body.length})")
 
         return try {
             val response = RetrofitClient.apiService.uploadMessages(
@@ -61,6 +67,8 @@ class UploadMessageWorker(
                 )
             )
 
+            Log.d(TAG, "Server response for $clientMessageId: HTTP ${response.code()}")
+
             if (response.isSuccessful) {
                 Log.d(TAG, "Uploaded message $clientMessageId: ${response.body()}")
                 Result.success()
@@ -68,6 +76,7 @@ class UploadMessageWorker(
                 Log.w(TAG, "Upload rejected: token invalid/revoked")
                 Result.failure()
             } else {
+                Log.w(TAG, "Upload failed with HTTP ${response.code()}: ${response.errorBody()?.string()}")
                 Result.retry()
             }
         } catch (e: Exception) {

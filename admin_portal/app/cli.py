@@ -13,6 +13,7 @@ from app.services.reference_extraction import extract_reference_id
 _DUMMY_DEVICE_IDS = (
     "3b367883-29c3-4465-9130-c12eab007f84",  # "Reference ID verify"
     "99999999-9999-9999-9999-999999999999",  # "Render Deploy Test"
+    "18f6af96-4e55-4d64-83d2-bda1dbcbe01c",  # "root-cause-diagnostic-clean" (20 Jul outage investigation)
 )
 _STRAY_MESSAGE_DEVICE_ID = "10f52fd6-17d6-47bf-9b0a-849a3f32e897"  # real "vivo I2217" device
 _STRAY_MESSAGE_SENDER_RAW = "VM-BOBSMS-S"
