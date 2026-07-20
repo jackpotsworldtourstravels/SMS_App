@@ -1,6 +1,10 @@
 package com.example.sms_frwd
 
+import android.Manifest
 import android.app.Application
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -17,6 +21,8 @@ class SmsForwardApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        startSmsMonitorServiceIfPermitted()
 
         val networkConstraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -49,5 +55,20 @@ class SmsForwardApplication : Application() {
             ExistingPeriodicWorkPolicy.KEEP,
             heartbeatRequest
         )
+    }
+
+    // Only meaningful once RECEIVE_SMS is granted (first app launch hasn't
+    // asked yet). MainActivity starts the service directly the moment
+    // permission is granted, so this covers every later process restart.
+    fun startSmsMonitorServiceIfPermitted() {
+        val hasSmsPermission = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.RECEIVE_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasSmsPermission) {
+            ContextCompat.startForegroundService(
+                this, Intent(this, SmsMonitorService::class.java)
+            )
+        }
     }
 }
